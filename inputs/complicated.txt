@@ -1,0 +1,14 @@
+graph LR
+    A[a=0] --> B[b=0]
+    B --> C[a=a+1]
+    C --> D[b=b+1]
+    D --> E{b<42}
+    E -->|True| C
+    E -->|False| F([a])
+    F --> O{b>=1000}
+    O -->|True| Q
+    O -->|False| G{a%5==0}
+    G -->|False| B
+    G -->|True| H{a < 500}
+    H -->|False| B
+    H -->|True| E
