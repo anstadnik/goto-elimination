@@ -1,6 +1,6 @@
 #include "header.hpp"
 
-namespace program {
+namespace statement {
 Expression::Expression(const string label) : label(move(label)) {}
 
 Arbitrary::Arbitrary(const string label, const string code)
@@ -17,7 +17,7 @@ Arbitrary::~Arbitrary(){};
 Assignment::~Assignment(){};
 WhileLoop::~WhileLoop(){};
 
-ostream& operator<<(std::ostream& os, program::Expression::ptr a) {
+ostream& operator<<(std::ostream& os, statement::Expression::ptr a) {
   os << a->label;
   return os;
 }

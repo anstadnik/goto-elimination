@@ -41,7 +41,6 @@ if(USE_OPENMP)
 endif()
 
 # Copy to source directory
-message(${CMAKE_CURRENT_LIST_DIR})
 add_custom_target(
     copy-compile-commands ALL
     DEPENDS

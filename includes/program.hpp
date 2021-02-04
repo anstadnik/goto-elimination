@@ -1,73 +1,68 @@
-#include <cctype>
-#include <variant>
-#include <chrono>
-#include <fstream>
-#include <io/io.hpp>
-#include <iostream>
-#include <sstream>
-#include <thread>
-#include <unordered_map>
-#include <variant>
+#include <list>
 #include <memory>
-#include <algorithm>
+#include <ostream>
+#include <string>
+#include <unordered_map>
+#include <iostream>
 
 using namespace std;
 
-namespace program 
-{
-  class Expression {
-   private:
-    const string label;
-  
-   public:
-    typedef std::shared_ptr<Expression> ptr;
-    Expression(const string);
-    virtual ~Expression() = 0;
-    friend ostream& operator<<(ostream& os, Expression::ptr a);
-  };
+namespace statement {
+class Expression {
+ private:
+  const string label;
 
-  class Arbitrary: public Expression {
-    private:
-      const string code;
+ public:
+  typedef std::shared_ptr<Expression> ptr;
+  Expression(const string);
+  virtual ~Expression() = 0;
+  friend ostream& operator<<(ostream& os, Expression::ptr a);
+};
 
-   public:
-    Arbitrary(const string, const string);
-    virtual ~Arbitrary();
-  };
-  
-  class Assignment : public Expression {
-   private:
-    const string var;
-    const string op;
-  
-   public:
-    Assignment(const string, const string, const string);
-    virtual ~Assignment();
-  };
-  
-  class Conditional : public Expression {
-   private:
-   public:
-    Conditional(const string&);
-    virtual ~Conditional();
-  };
-  
-  class WhileLoop : public Expression {
-   private:
-   public:
-    WhileLoop(const string&);
-    virtual ~WhileLoop();
-  };
+class Arbitrary : public Expression {
+ private:
+  const string code;
 
-  class Program {
-   private:
-    unordered_map<string, variant<Expression::ptr>> p;
-  
-   public:
-    Program(list<string>);
-    virtual ~Program();
-  };
-  
-  Expression::ptr expressionFactory(string s);
-  pair<Expression::ptr, Expression::ptr> splitConnection(const string& s);
-} /*  program  */ 
+ public:
+  Arbitrary(const string, const string);
+  virtual ~Arbitrary();
+};
+
+class Assignment : public Expression {
+ private:
+  const string var;
+  const string op;
+
+ public:
+  Assignment(const string, const string, const string);
+  virtual ~Assignment();
+};
+
+class Conditional : public Expression {
+ private:
+ public:
+  Conditional(const string&);
+  virtual ~Conditional();
+};
+
+class WhileLoop : public Expression {
+ private:
+ public:
+  WhileLoop(const string&);
+  virtual ~WhileLoop();
+};
+
+enum class Condition {None, True, False};
+
+class Statement {
+ private:
+  unordered_map<string, Expression::ptr> p;
+
+ public:
+  Statement(list<string>);
+  virtual ~Statement();
+};
+
+Expression::ptr expressionFactory(string s);
+tuple<Expression::ptr, Expression::ptr, Condition> splitConnection(string s);
+}  // namespace program

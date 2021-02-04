@@ -1,6 +1,16 @@
 #include "header.hpp"
 #include <iterator>
 
+
+#define BACKWARD_HAS_DW 1
+#include "3rd_party/backward-cpp/backward.hpp"
+
+namespace backward {
+
+backward::SignalHandling sh;
+
+} // namespace backward
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -11,7 +21,7 @@ int main(int argc, char *argv[]) {
   string fn = parseArgs(2, dummy);
   /* string input = read_file_to_string(fn); */
   auto s = readFileToList(fn);
-  program::Program p(s);
+  statement::Statement st(s);
 
   return 0;
 }

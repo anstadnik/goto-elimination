@@ -4,7 +4,7 @@ graph LR
     C --> D[b=b+1]
     D --> E{b<42}
     E -->|True| C
-    E -->|False| F([a])
+    E -->|False| F(a)
     F --> O{b>=1000}
     O -->|True| Q
     O -->|False| G{a%5==0}
