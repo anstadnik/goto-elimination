@@ -5,7 +5,7 @@ using namespace std;
 namespace statement
 {
   Statement::Statement(list<string> p) {
-    if (!p.front().starts_with("graph "))
+    if (!!p.front().rfind("graph ", 0))
       throw runtime_error("The first line should be \'graph\'");
     p.pop_front();
   

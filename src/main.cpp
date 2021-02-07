@@ -3,13 +3,11 @@
 
 
 #define BACKWARD_HAS_DW 1
-#include "3rd_party/backward-cpp/backward.hpp"
+#include "3rd_party/backward.hpp"
 
 namespace backward {
-
 backward::SignalHandling sh;
-
-} // namespace backward
+}  // namespace backward
 
 using namespace std;
 

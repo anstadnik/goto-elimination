@@ -2,7 +2,6 @@
 #include "program.hpp"
 #include "io/io.hpp"
 
-
-using namespace std;
+#include "3rd_party/icecream.hpp"
 
 string parseArgs(int argc, const char* argv[]);

@@ -1,5 +1,4 @@
-#include <program.hpp>
-#include "3rd_party/termcolor.hpp"
+#include "header.hpp"
 
 
 namespace statement {
@@ -10,11 +9,26 @@ struct E {
   string statement;
   string to_print;
   string condition;
+
+  friend ostream& operator<<(ostream& os, const E& e);
 };
+
+ostream& operator<<(ostream& os, const E& e) {
+  return os << termcolor::reset << "Label: " << termcolor::green << e.label
+            << termcolor::reset << ", statement: " << termcolor::green
+            << e.statement << termcolor::reset
+            << ", to_print: " << termcolor::green << e.to_print
+            << termcolor::reset << ", condition: " << termcolor::green
+            << e.condition << termcolor::reset;
+}
 }  // namespace
 
 void parse_token(const string& s, size_t& beg, size_t& end, E& e) {
-  e.label = e.label.size() ? e.label : s.substr(0, end);
+  if (!e.label.size()) {
+    e.label = s.substr(0, end);
+    beg = end;
+    return;
+  }
 
   switch (s[end]) {
     case '[':  // Assignment
@@ -33,9 +47,10 @@ void parse_token(const string& s, size_t& beg, size_t& end, E& e) {
       e.condition = s.substr(beg, s.find("}", beg));
       break;
     default:
+      IC(s[beg], s[end]);
       throw runtime_error("Invalid line:\n" + s);
   }
-  beg = end + 1;
+  beg = end;
 }
 
 Expression::ptr expressionFactory(string s) {
@@ -48,14 +63,11 @@ Expression::ptr expressionFactory(string s) {
                               static_cast<int (*)(int)>(isalpha))) != s.end()) {
     end = distance(s.begin(), end_i);
     parse_token(s, beg, end, e);
+    /* IC(beg); */
   }
 
-  std::cout << termcolor::reset << "s: "           << termcolor::green << s
-            << termcolor::reset << ", label: "     << termcolor::green << e.label
-            << termcolor::reset << ", statement: " << termcolor::green << e.statement
-            << termcolor::reset << ", to_print: "  << termcolor::green << e.to_print
-            << termcolor::reset << ", condition: " << termcolor::green << e.condition
-            << termcolor::reset << std::endl;
+  std::cout << termcolor::reset << "s: " << termcolor::green << s << ". " << e << endl;
+
   /* TODO: create an Expression <01-02-21, astadnik> */
   return make_shared<Assignment>(s, "", "");
 }
@@ -68,18 +80,13 @@ tuple<Expression::ptr, Expression::ptr, Condition> splitConnection(string s) {
   string first = s.substr(0, delitimer),
          second = s.substr(delitimer + "-->"s.size());
   /* second[static_cast<size_t>(2e10)] = 'n'; */
-  int hm=3;
-  if (1)
-    hm = 0;
-
-  std::cout << 2/hm << std::endl;
 
   Condition cond = Condition::None;
-  if (second.starts_with("|True|")) {
+  if (!second.rfind("|True|", 0)) {
     cond = Condition::True;
     second = second.substr("|True|"s.size());
   }
-  if (second.starts_with("|False|")) {
+  if (!second.rfind("|False|", 0)) {
     cond = Condition::False;
     second = second.substr("|False|"s.size());
   }

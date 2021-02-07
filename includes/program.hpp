@@ -4,6 +4,9 @@
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
+
+#include "3rd_party/termcolor.hpp"
 
 using namespace std;
 

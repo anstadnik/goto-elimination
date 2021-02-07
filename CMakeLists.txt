@@ -6,13 +6,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # CPP params
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
-	string(APPEND CMAKE_LINKER_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
+	# string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
+	string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -ftime-trace")
+	# string(APPEND CMAKE_LINKER_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
 endif()
 
 # Set cmake standard
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 # Define project
 project(app CXX)
