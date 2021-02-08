@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
   const char* dummy[] = {"app", "../inputs/complicated.txt", NULL};
   string fn = parseArgs(2, dummy);
   /* string input = read_file_to_string(fn); */
-  auto s = readFileToList(fn);
-  statement::Statement st(s);
+  list<string> s = readFileToList(fn);
+  statement::Statement::ptr st = statement::statementFactory(s);
 
   return 0;
 }
