@@ -75,7 +75,7 @@ Expression::ptr expressionFactory(string s) {
   /* std::cout << termcolor::reset << "s: " << termcolor::green << s << ". " << e << endl; */
 
   if (e.condition.size())
-    return make_shared<Conditional>(e.label, e.condition);
+    return make_shared<Goto>(e.label, e.condition);
   if (e.to_print.size())
     return make_shared<Print>(e.label, e.to_print);
   if (e.assignment.first.size())

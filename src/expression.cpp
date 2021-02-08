@@ -36,11 +36,11 @@ WhileLoop::operator string() {
          static_cast<string>(*body) + "\n}\n";
 }
 Print::operator string() {
-  return Expression::operator string() + "std::cout << " + var + "std::endl;\n";
+  return Expression::operator string() + "std::cout << " + var + " << std::endl;\n";
 }
 Goto::operator string() {
   return Expression::operator string() + "if (" + condition + ") {\ngoto " +
-         dest + "\n";
+         dest + "\n}\n";
 }
 
 /* ostream& operator<<(ostream& os, statement::Expression::ptr a) { */

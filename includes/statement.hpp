@@ -1,6 +1,8 @@
+#include <set>
 #include <list>
 #include <memory>
 #include <unordered_map>
+#include <cassert>
 
 #include "3rd_party/termcolor.hpp"
 
@@ -12,11 +14,11 @@ namespace statement {
  *  Main classes  *
  ******************/
 
-class Expression {
- private:
-  const string label;
+enum class Condition { None, True, False };
 
+class Expression {
  public:
+  const string label;
   typedef std::shared_ptr<Expression> ptr;
   Expression(string label);
   Expression() = default;
@@ -33,6 +35,8 @@ class Statement {
   typedef std::shared_ptr<Statement> ptr;
   /* Statement() = default; */
   Statement(list<Expression::ptr>);
+  void add(Expression::ptr& left, Expression::ptr& right, Condition cond);
+  void replace(string pattern, Expression::ptr& replacement);
   operator string();
   virtual ~Statement() = default;
   /* friend ostream& operator<<(ostream& os, Statement::ptr a); */
@@ -43,11 +47,10 @@ class Statement {
  *******************************/
 
 class Assignment : public Expression {
- private:
+ public:
   const string var;
   const string op;
 
- public:
   Assignment() = default;
   Assignment(string label, string var, string op);
   virtual operator string() final override;
@@ -55,12 +58,11 @@ class Assignment : public Expression {
 };
 
 class Conditional : public Expression {
- private:
+ public:
   Statement::ptr true_branch;
   Statement::ptr false_branch;
   string condition;
 
- public:
   Conditional() = default;
   Conditional(string label, string condition,
               Statement::ptr true_branch = nullptr,
@@ -70,11 +72,10 @@ class Conditional : public Expression {
 };
 
 class WhileLoop : public Expression {
- private:
+ public:
   Statement::ptr body;
   string condition;
 
- public:
   WhileLoop() = default;
   WhileLoop(string label, Statement::ptr body, string condition);
   virtual operator string() final override;
@@ -82,10 +83,9 @@ class WhileLoop : public Expression {
 };
 
 class Print : public Expression {
- private:
+ public:
   string var;
 
- public:
   Print() = default;
   Print(string label, string var);
   virtual operator string() final override;
@@ -93,13 +93,12 @@ class Print : public Expression {
 };
 
 class Goto : public Expression {
- private:
+ public:
   string dest;
   string condition;
 
- public:
   Goto() = default;
-  Goto(string label, string condition, string dest);
+  Goto(string label, string condition, string dest="");
   virtual operator string() final override;
   virtual ~Goto() = default;
 };
