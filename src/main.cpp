@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   string fn = parseArgs(2, dummy);
   /* string input = read_file_to_string(fn); */
   list<string> s = readFileToList(fn);
-  statement::Stmt::ptr st = statement::statementFactory(s);
+  statement::Stmt st = statement::statementFactory(s);
 
   return 0;
 }

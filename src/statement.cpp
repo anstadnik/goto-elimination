@@ -4,7 +4,12 @@ using namespace std;
 
 namespace statement {
 
-tuple<Expr::ptr, Expr::ptr, Cond> splitConnection(string s) {
+/* auto get_label = [](auto&& expr) -> string { expr.label; }; */
+string get_label(const Expr& v) {
+  return visit([](auto&& expr) {return expr.label;}, v);
+}
+
+tuple<Expr, Expr, Cond> splitConnection(string s) {
   s.erase(remove(s.begin(), s.end(), ' '), s.end());
   size_t delitimer = s.find("-->");
   if (delitimer == std::string::npos)
@@ -25,8 +30,8 @@ tuple<Expr::ptr, Expr::ptr, Cond> splitConnection(string s) {
   return {expressionFactory(first), expressionFactory(second), cond};
 }
 
-void error(const Expr::ptr& e, string message) {
-  throw runtime_error(e->label + ": " + message);
+void error(const Expr& e, string message) {
+  throw runtime_error(get_label(e) + ": " + message);
 }
 
 pair<ParseTree, string> gen_parse_tree(list<string> s) {
@@ -35,36 +40,36 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
 
   for (const auto& e : s) {
     auto [left, right, cond] = splitConnection(e);
-    if (!t.size()) t[left->label] = {left, ""}, first = left->label;
-    assert(t.count(left->label));
+    if (!t.size()) t[get_label(left)] = {left, ""}, first = get_label(left);
+    assert(t.count(get_label(left)));
 
     // Is right in t?
-    if (t.count(right->label)) {
+    if (t.count(get_label(right))) {
       if (cond == Cond::None) error(left, "tried to redefine connection");
       if (cond == Cond::True) {
-        if (dynamic_cast<Goto*>(t[left->label].first.get())->dest.size())
+        if (get<Goto>(t[get_label(left)].first).dest.size())
           error(left, "tried to redefine connection");
-        dynamic_cast<Goto*>(t[left->label].first.get())->dest = right->label;
+        get<Goto>(t[get_label(left)].first).dest = get_label(right);
       } else if (cond == Cond::False) {
-        if (t[left->label].second.size())
+        if (t[get_label(left)].second.size())
           error(left, "tried to redefine connection");
-        t[left->label].second = right->label;
+        t[get_label(left)].second = get_label(right);
       }
     } else {
-      t[right->label] = {right, ""};
+      t[get_label(right)] = {right, ""};
       if (cond == Cond::None) {
-        if (t[left->label].second.size())
+        if (t[get_label(left)].second.size())
           error(left, "tried to redefine connection");
-        t[left->label].second = right->label;
+        t[get_label(left)].second = get_label(right);
       }
       if (cond == Cond::True) {
-        if (dynamic_cast<Goto*>(t[left->label].first.get())->dest.size())
+        if (get<Goto>(t[get_label(left)].first).dest.size())
           error(left, "tried to redefine connection");
-        dynamic_cast<Goto*>(t[left->label].first.get())->dest = right->label;
+        get<Goto>(t[get_label(left)].first).dest = get_label(right);
       } else if (cond == Cond::False) {
-        if (t[left->label].second.size())
+        if (t[get_label(left)].second.size())
           error(left, "tried to redefine connection");
-        t[left->label].second = right->label;
+        t[get_label(left)].second = get_label(right);
       }
     }
   }
@@ -72,17 +77,18 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
   return {t, first};
 }
 
-Stmt::ptr parse_tree_to_statement(ParseTree t, const string& first) {
-  pair<Expr::ptr, string> cur = t[first];
-  Stmt::ptr s = make_shared<Stmt>();
+Stmt parse_tree_to_statement(ParseTree t, const string& first) {
+  pair<Expr, string> cur = t[first];
+  Stmt s;
   unordered_set<string> keys;
 
-  while (42) {
-  }
+  /* while (42) { */
+
+  /* } */
   return s;
 }
 
-Stmt::ptr statementFactory(list<string> s) {
+Stmt statementFactory(list<string> s) {
   if (!!s.front().rfind("graph ", 0))
     throw runtime_error("The first line should be \'graph\'");
   s.pop_front();
@@ -92,18 +98,18 @@ Stmt::ptr statementFactory(list<string> s) {
   return stmt;
 }
 
-/* void Statement::add(Expression::ptr& left, Expression::ptr& right, Condition
+/* void Statement::add(Expr& left, Expr& right, Condition
  * cond) { */
 /*   if (!s.size()) */
-/*     s[left->label] = left; */
-/*   /1* auto l_i = find_if(s.begin(), s.end(), [&left](const Expression::ptr&
+/*     s[get_label(left)] = left; */
+/*   /1* auto l_i = find_if(s.begin(), s.end(), [&left](const Expr&
  * e) { *1/ */
-/*   /1*   return e->label == left->label;}); *1/ */
-/*   /1* auto r_i = find_if(s.begin(), s.end(), [&right](const Expression::ptr&
+/*   /1*   return e.label == get_label(left);}); *1/ */
+/*   /1* auto r_i = find_if(s.begin(), s.end(), [&right](const Expr&
  * e) { *1/ */
-/*   /1*   return e->label == right->label;}); *1/ */
+/*   /1*   return e.label == get_label(right);}); *1/ */
 
-/*   if (s.count(right->label)) { */
+/*   if (s.count(get_label(right))) { */
 /*     // Right was found */
 /*     if (cond == Condition::None) */
 /*       // We can only push_back, or add to conditionals */
@@ -117,11 +123,11 @@ Stmt::ptr statementFactory(list<string> s) {
 /*     // Right was not found */
 /*     if (l_i != s.end() && next(l_i) == s.end()) */
 /*       // Left is the last element, so push a new one to the end */
-/*       s[right->label] = right, s[left->label]->next = right->label; */
+/*       s[get_label(right)] = right, s[get_label(left)].next = get_label(right); */
 /*     if (cond == Condition::None) */
 /*       // We can only push_back, or add to conditionals */
 /*       error(left, "tried to redefine connection"); */
-/*     auto st = make_shared<Statement>(list<Expression::ptr>{right}); */
+/*     auto st = make_shared<Statement>(list<Expr>{right}); */
 
 /*     // Make sure left is Conditional */
 /*     if (dynamic_cast<Conditional*>(l_i) == nullptr) */
@@ -138,11 +144,13 @@ Stmt::ptr statementFactory(list<string> s) {
 /*   } */
 /* } */
 
-Stmt::operator string() {
+Stmt::operator string() const {
   string ret;
-  for (const auto& e : s) ret += static_cast<string>(*e);
+  for (const auto& e : s) ret += visit([](auto&& expr) { return string(expr); }, e);
   return ret;
 }
 
-Stmt::Stmt(list<Expr::ptr> s) : s(move(s)) {}
+Stmt::operator bool() const { return s.empty(); }
+
+Stmt::Stmt(list<Expr> s) : s(move(s)) {}
 }  // namespace statement

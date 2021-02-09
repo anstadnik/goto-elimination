@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	# string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
-	string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -ftime-trace")
+	# string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -ftime-trace")
 	# string(APPEND CMAKE_LINKER_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
 endif()
 

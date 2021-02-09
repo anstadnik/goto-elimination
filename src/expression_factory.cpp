@@ -25,7 +25,7 @@ ostream& operator<<(ostream& os, const E& e) {
 }  // namespace
 
 void parseToken(const string& s, size_t& beg, size_t& end, E& e) {
-  if (!e.label.size()) {
+  if (e.label.empty()) {
     e.label = s.substr(0, end);
     beg = end;
     return;
@@ -59,7 +59,7 @@ void parseToken(const string& s, size_t& beg, size_t& end, E& e) {
   beg = end + 1;
 }
 
-Expr::ptr expressionFactory(string s) {
+Expr expressionFactory(string s) {
   size_t beg = 0, end;
   string::iterator end_i;
 
@@ -71,14 +71,14 @@ Expr::ptr expressionFactory(string s) {
     parseToken(s, beg, end, e);
   }
 
-  if (e.condition.size())
-    return make_shared<Goto>(e.label, e.condition);
-  if (e.to_print.size())
-    return make_shared<Print>(e.label, e.to_print);
-  if (e.assignment.first.size())
-    return make_shared<Assign>(e.label, e.assignment.first, e.assignment.second);
-  if (e.label.size())
+  if (!e.condition.empty())
+    return Goto(e.label, e.condition);
+  if (!e.to_print.empty())
+    return Print(e.label, e.to_print);
+  if (!e.assignment.first.empty())
+    return Assign(e.label, e.assignment.first, e.assignment.second);
+  if (!e.label.empty())
     throw runtime_error("Wrong input");
-  return make_shared<Expr>(s);
+  return BaseExpr(s);
 }
 }  // namespace program
