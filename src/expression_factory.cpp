@@ -1,6 +1,7 @@
 #include "header.hpp"
 
 using namespace std;
+using namespace termcolor;
 
 namespace statement {
 
@@ -15,13 +16,11 @@ struct E {
 };
 
 ostream& operator<<(ostream& os, const E& e) {
-  return os << termcolor::reset << "Label: " << termcolor::green << e.label
-            << termcolor::reset << ", statement: " << termcolor::green
-            << e.assignment.first << "=" << e.assignment.second
-            << termcolor::reset << ", to_print: " << termcolor::green
-            << e.to_print << termcolor::reset
-            << ", condition: " << termcolor::green << e.condition
-            << termcolor::reset;
+  return os << reset << "Label: " << green << e.label << reset
+            << ", statement: " << green << e.assignment.first << "="
+            << e.assignment.second << reset << ", to_print: " << green
+            << e.to_print << reset << ", condition: " << green << e.condition
+            << reset;
 }
 }  // namespace
 
@@ -60,8 +59,8 @@ void parseToken(const string& s, size_t& beg, size_t& end, E& e) {
   beg = end + 1;
 }
 
-Expression::ptr expressionFactory(string s) {
-  size_t beg = 0, end = s.size();
+Expr::ptr expressionFactory(string s) {
+  size_t beg = 0, end;
   string::iterator end_i;
 
   E e;
@@ -72,16 +71,14 @@ Expression::ptr expressionFactory(string s) {
     parseToken(s, beg, end, e);
   }
 
-  /* std::cout << termcolor::reset << "s: " << termcolor::green << s << ". " << e << endl; */
-
   if (e.condition.size())
     return make_shared<Goto>(e.label, e.condition);
   if (e.to_print.size())
     return make_shared<Print>(e.label, e.to_print);
   if (e.assignment.first.size())
-    return make_shared<Assignment>(e.label, e.assignment.first, e.assignment.second);
+    return make_shared<Assign>(e.label, e.assignment.first, e.assignment.second);
   if (e.label.size())
     throw runtime_error("Wrong input");
-  return make_shared<Expression>(s);
+  return make_shared<Expr>(s);
 }
 }  // namespace program

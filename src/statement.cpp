@@ -4,7 +4,7 @@ using namespace std;
 
 namespace statement {
 
-tuple<Expression::ptr, Expression::ptr, Condition> splitConnection(string s) {
+tuple<Expr::ptr, Expr::ptr, Cond> splitConnection(string s) {
   s.erase(remove(s.begin(), s.end(), ' '), s.end());
   size_t delitimer = s.find("-->");
   if (delitimer == std::string::npos)
@@ -12,94 +12,84 @@ tuple<Expression::ptr, Expression::ptr, Condition> splitConnection(string s) {
   string first = s.substr(0, delitimer),
          second = s.substr(delitimer + "-->"s.size());
 
-  Condition cond = Condition::None;
+  Cond cond = Cond::None;
   if (!second.rfind("|True|", 0)) {
-    cond = Condition::True;
+    cond = Cond::True;
     second = second.substr("|True|"s.size());
   }
   if (!second.rfind("|False|", 0)) {
-    cond = Condition::False;
+    cond = Cond::False;
     second = second.substr("|False|"s.size());
   }
 
   return {expressionFactory(first), expressionFactory(second), cond};
 }
 
-void error(const Expression::ptr& e, string message) {
+void error(const Expr::ptr& e, string message) {
   throw runtime_error(e->label + ": " + message);
 }
 
-unordered_map<string, pair<Expression::ptr, string>> gen_parse_tree(
-    list<string> s) {
-  unordered_map<string, pair<Expression::ptr, string>> t;
-  vector<string> keys;
+pair<ParseTree, string> gen_parse_tree(list<string> s) {
+  ParseTree t;
+  string first;
 
   for (const auto& e : s) {
     auto [left, right, cond] = splitConnection(e);
-    if (find(keys.begin(), keys.end(), left->label) == keys.end())
-      keys.push_back(left->label);
-    if (find(keys.begin(), keys.end(), right->label) == keys.end())
-      keys.push_back(right->label);
-    if (!t.size()) t[left->label] = {left, ""};
+    if (!t.size()) t[left->label] = {left, ""}, first = left->label;
     assert(t.count(left->label));
 
     // Is right in t?
     if (t.count(right->label)) {
-      if (cond == Condition::None) error(left, "tried to redefine connection");
-      if (cond == Condition::True) {
+      if (cond == Cond::None) error(left, "tried to redefine connection");
+      if (cond == Cond::True) {
         if (dynamic_cast<Goto*>(t[left->label].first.get())->dest.size())
           error(left, "tried to redefine connection");
         dynamic_cast<Goto*>(t[left->label].first.get())->dest = right->label;
-      } else if (cond == Condition::False) {
+      } else if (cond == Cond::False) {
         if (t[left->label].second.size())
           error(left, "tried to redefine connection");
         t[left->label].second = right->label;
       }
     } else {
       t[right->label] = {right, ""};
-      if (cond == Condition::None) {
+      if (cond == Cond::None) {
         if (t[left->label].second.size())
           error(left, "tried to redefine connection");
         t[left->label].second = right->label;
       }
-      if (cond == Condition::True) {
+      if (cond == Cond::True) {
         if (dynamic_cast<Goto*>(t[left->label].first.get())->dest.size())
           error(left, "tried to redefine connection");
         dynamic_cast<Goto*>(t[left->label].first.get())->dest = right->label;
-      } else if (cond == Condition::False) {
+      } else if (cond == Cond::False) {
         if (t[left->label].second.size())
           error(left, "tried to redefine connection");
         t[left->label].second = right->label;
       }
     }
   }
-
-  vector<string> t_keys(t.size());
-
-  // This is the crucial bit: Transform map to list of keys (or values)
-  auto key_selector = [](auto pair){return pair.first;};
-  transform(t.begin(), t.end(), t_keys.begin(), key_selector);
-
-  assert(set(keys.begin(), keys.end()) == set(t_keys.begin(), t_keys.end()));
-
-  for (auto i : keys) 
-    std::cout << string(*t[i].first) + "goto " + (t[i].second.size() ? t[i].second : "terminate") + "\n";
-
-  return t;
+  print_parse_tree(t);
+  return {t, first};
 }
 
-Statement::ptr parse_tree_to_statement(
-    unordered_map<string, pair<Expression::ptr, string>> t) {
-  return make_shared<Statement>(list<Expression::ptr>());
+Stmt::ptr parse_tree_to_statement(ParseTree t, const string& first) {
+  pair<Expr::ptr, string> cur = t[first];
+  Stmt::ptr s = make_shared<Stmt>();
+  unordered_set<string> keys;
+
+  while (42) {
+  }
+  return s;
 }
 
-Statement::ptr statementFactory(list<string> s) {
+Stmt::ptr statementFactory(list<string> s) {
   if (!!s.front().rfind("graph ", 0))
     throw runtime_error("The first line should be \'graph\'");
   s.pop_front();
 
-  auto parse_tree = gen_parse_tree(s);
-  return parse_tree_to_statement(parse_tree);
+  auto [parse_tree, first] = gen_parse_tree(s);
+  auto stmt = parse_tree_to_statement(parse_tree, first);
+  return stmt;
 }
 
 /* void Statement::add(Expression::ptr& left, Expression::ptr& right, Condition
@@ -148,11 +138,11 @@ Statement::ptr statementFactory(list<string> s) {
 /*   } */
 /* } */
 
-Statement::operator string() {
+Stmt::operator string() {
   string ret;
   for (const auto& e : s) ret += static_cast<string>(*e);
   return ret;
 }
 
-Statement::Statement(list<Expression::ptr> s) : s(move(s)) {}
+Stmt::Stmt(list<Expr::ptr> s) : s(move(s)) {}
 }  // namespace statement

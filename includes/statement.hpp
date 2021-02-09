@@ -2,6 +2,7 @@
 #include <list>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <cassert>
 
 #include "3rd_party/termcolor.hpp"
@@ -14,31 +15,31 @@ namespace statement {
  *  Main classes  *
  ******************/
 
-enum class Condition { None, True, False };
+enum class Cond { None, True, False };
 
-class Expression {
+class Expr {
  public:
   const string label;
-  typedef std::shared_ptr<Expression> ptr;
-  Expression(string label);
-  Expression() = default;
+  typedef std::shared_ptr<Expr> ptr;
+  Expr(string label);
+  Expr() = default;
   virtual operator string();
-  virtual ~Expression() = default;
+  virtual ~Expr() = default;
   /* friend ostream& operator<<(ostream& os, Expression::ptr a); */
 };
 
-class Statement {
+class Stmt {
  private:
-  list<Expression::ptr> s;
+  list<Expr::ptr> s;
 
  public:
-  typedef std::shared_ptr<Statement> ptr;
-  /* Statement() = default; */
-  Statement(list<Expression::ptr>);
-  void add(Expression::ptr& left, Expression::ptr& right, Condition cond);
-  void replace(string pattern, Expression::ptr& replacement);
+  typedef std::shared_ptr<Stmt> ptr;
+  Stmt() = default;
+  Stmt(list<Expr::ptr>);
+  void add(Expr::ptr& left, Expr::ptr& right, Cond cond);
+  void replace(string pattern, Expr::ptr& replacement);
   operator string();
-  virtual ~Statement() = default;
+  virtual ~Stmt() = default;
   /* friend ostream& operator<<(ostream& os, Statement::ptr a); */
 };
 
@@ -46,43 +47,43 @@ class Statement {
  *  Expression specifications  *
  *******************************/
 
-class Assignment : public Expression {
+class Assign : public Expr {
  public:
   const string var;
   const string op;
 
-  Assignment() = default;
-  Assignment(string label, string var, string op);
+  Assign() = default;
+  Assign(string label, string var, string op);
   virtual operator string() final override;
-  virtual ~Assignment() = default;
+  virtual ~Assign() = default;
 };
 
-class Conditional : public Expression {
+class If : public Expr {
  public:
-  Statement::ptr true_branch;
-  Statement::ptr false_branch;
+  Stmt::ptr true_branch;
+  Stmt::ptr false_branch;
   string condition;
 
-  Conditional() = default;
-  Conditional(string label, string condition,
-              Statement::ptr true_branch = nullptr,
-              Statement::ptr false_branch = nullptr);
+  If() = default;
+  If(string label, string condition,
+              Stmt::ptr true_branch = nullptr,
+              Stmt::ptr false_branch = nullptr);
   virtual operator string() final override;
-  virtual ~Conditional() = default;
+  virtual ~If() = default;
 };
 
-class WhileLoop : public Expression {
+class While : public Expr {
  public:
-  Statement::ptr body;
+  Stmt::ptr body;
   string condition;
 
-  WhileLoop() = default;
-  WhileLoop(string label, Statement::ptr body, string condition);
+  While() = default;
+  While(string label, Stmt::ptr body, string condition);
   virtual operator string() final override;
-  virtual ~WhileLoop() = default;
+  virtual ~While() = default;
 };
 
-class Print : public Expression {
+class Print : public Expr {
  public:
   string var;
 
@@ -92,7 +93,7 @@ class Print : public Expression {
   virtual ~Print() = default;
 };
 
-class Goto : public Expression {
+class Goto : public Expr {
  public:
   string dest;
   string condition;
@@ -103,6 +104,7 @@ class Goto : public Expression {
   virtual ~Goto() = default;
 };
 
-Expression::ptr expressionFactory(string s);
-Statement::ptr statementFactory(list<string> s);
+typedef unordered_map<string, pair<Expr::ptr, string>> ParseTree;
+Expr::ptr expressionFactory(string s);
+Stmt::ptr statementFactory(list<string> s);
 }  // namespace statement

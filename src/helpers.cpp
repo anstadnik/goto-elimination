@@ -8,3 +8,16 @@ std::string parseArgs(int argc, const char *argv[]) {
 
   return argv[1];
 }
+
+
+void print_parse_tree(statement::ParseTree t) {
+  vector<string> keys(t.size());
+
+  auto key_selector = [](auto pair) { return pair.first; };
+  transform(t.begin(), t.end(), keys.begin(), key_selector);
+  sort(keys.begin(), keys.end());
+
+  for (auto i : keys)
+    std::cout << string(*t[i].first) + "goto " +
+                     (t[i].second.size() ? t[i].second : "terminate") + "\n";
+}
