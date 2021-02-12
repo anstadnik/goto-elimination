@@ -1,6 +1,6 @@
 #pragma once
 
-/* #include "3rd_party/icecream.hpp" */
+#include "3rd_party/icecream.hpp"
 #include "io/io.hpp"
 #include "statement.hpp"
 

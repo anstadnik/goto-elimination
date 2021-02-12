@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
   /* string input = read_file_to_string(fn); */
   list<string> s = readFileToList(fn);
   statement::Stmt st = statement::statementFactory(s);
+  std::cout  << std::endl;
+  std::cout << string(st) << std::endl;
 
   return 0;
 }
