@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   list<string> s = readFileToList(fn);
   statement::Stmt st = statement::statementFactory(s);
   std::cout  << std::endl;
-  std::cout << string(st) << std::endl;
+  std::cout << st << std::endl;
 
   return 0;
 }

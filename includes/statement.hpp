@@ -40,7 +40,7 @@ class BaseExpr {
   BaseExpr& operator= (const BaseExpr&) = default;
   BaseExpr& operator= (BaseExpr&&) = default;
   BaseExpr(string label);
-  virtual operator string() const;
+  friend ostream& operator<<(ostream& os, const BaseExpr& a);
   virtual ~BaseExpr() = default;
   /* friend ostream& operator<<(ostream& os, Expression::ptr a); */
 };
@@ -61,7 +61,7 @@ class Stmt {
   void push_back(Expr expr);
   /* void move_to_cond(string cond_label, list<Expr>::iterator begin, list<Expr>::iterator end); */
   void replace(string pattern, Expr& replacement);
-  operator string() const;
+  friend ostream& operator<<(ostream& os, const Stmt& a);
   bool empty() const;
   virtual ~Stmt() = default;
   /* friend ostream& operator<<(ostream& os, Statement::ptr a); */
@@ -82,7 +82,7 @@ class Assign : public BaseExpr {
   Assign& operator=(const Assign&) = default;
   Assign& operator=(Assign&&) = default;
   Assign(string label, string var, string op);
-  virtual operator string() const final override;
+  friend ostream& operator<<(ostream& os, const Assign& a);
   virtual ~Assign() = default;
 };
 
@@ -97,7 +97,7 @@ class If : public BaseExpr {
   If& operator=(const If&) = default;
   If& operator=(If&&) = default;
   If(string label, string condition, Stmt true_branch = Stmt());
-  virtual operator string() const final override;
+  friend ostream& operator<<(ostream& os, const If& a);
   virtual ~If() = default;
 };
 
@@ -112,7 +112,7 @@ class While : public BaseExpr {
   While& operator=(const While&) = default;
   While& operator=(While&&) = default;
   While(string label, Stmt body, string condition);
-  virtual operator string() const final override;
+  friend ostream& operator<<(ostream& os, const While& a);
   virtual ~While() = default;
 };
 
@@ -126,7 +126,7 @@ class Print : public BaseExpr {
   Print& operator=(const Print&) = default;
   Print& operator=(Print&&) = default;
   Print(string label, string var);
-  virtual operator string() const final override;
+  friend ostream& operator<<(ostream& os, const Print& a);
   virtual ~Print() = default;
 };
 
@@ -141,13 +141,15 @@ class Goto : public BaseExpr {
   Goto& operator=(const Goto&) = default;
   Goto& operator=(Goto&&) = default;
   Goto(string label, string condition, string dest="");
-  virtual operator string() const final override;
+  friend ostream& operator<<(ostream& os, const Goto& a);
   virtual ~Goto() = default;
 };
 
 typedef unordered_map<string, pair<Expr, string>> ParseTree;
+ostream& operator<<(ostream& os, const statement::ParseTree& t);
 
-string get_string(const Expr& v);
+/* string get_string(const Expr& v); */
+ostream& operator<<(ostream& os, const Expr& v);
 string get_label(const Expr& v);
 
 Expr expressionFactory(string s);

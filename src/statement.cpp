@@ -15,12 +15,6 @@ void Stmt::insert(string parent, Expr& expr) {
   s.insert(i, expr);
 }
 
-Stmt::operator string() const {
-  string ret;
-  for (const auto& e : s) ret += visit([](auto&& expr) { return string(expr); }, e);
-  return ret;
-}
-
 bool Stmt::empty() const { return s.empty(); }
 
 Stmt::Stmt(list<Expr> s) : s(move(s)) {}

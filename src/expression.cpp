@@ -1,3 +1,4 @@
+#include "3rd_party/termcolor.hpp"
 #include "header.hpp"
 
 using namespace termcolor;
@@ -19,36 +20,6 @@ Goto::Goto(string label, string condition, string dest)
 
 While::While(string label, Stmt body, string condition)
     : BaseExpr(move(label)), body(move(body)), condition(move(condition)) {}
-
-/* Expression::operator string() const { return "// Label: " + label + "\n"; }
- */
-BaseExpr::operator string() const { return label + ": "; }
-Assign::operator string() const {
-  return BaseExpr::operator string() + var + "=" + op + ";\n";
-}
-If::operator string() const {
-  return BaseExpr::operator string() + "if (" + condition + ") {\n" +
-         static_cast<string>(true_branch) + "\n" + "}\n";
-}
-While::operator string() const {
-  return BaseExpr::operator string() + "while (" + condition + ") {\n" +
-         static_cast<string>(body) + "\n}\n";
-}
-Print::operator string() const {
-  return BaseExpr::operator string() + "std::cout << " + var +
-         " << std::endl;\n";
-}
-Goto::operator string() const {
-  return BaseExpr::operator string() + "if (" + condition + ") {\ngoto " +
-         dest + "\n}\n";
-}
-
-string get_string(const Expr& v) {
-  return visit([](auto&& expr) { return string(expr); }, v);
-}
-string get_label(const Expr& v) {
-  return visit([](auto&& expr) { return expr.label; }, v);
-}
 
 /* ostream& operator<<(ostream& os, statement::Expression a) { */
 /*   return os << a.to_st; */

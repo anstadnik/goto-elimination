@@ -10,6 +10,5 @@ graph LR
     O -->|False| G{a%5==0}
     G -->|False| B
     G -->|True| H{a < 500}
+    H -->|False| B
     H -->|True| E
-    H -->|False| J
-    J --> B
