@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} algs) 
 
 # Add libs
-add_subdirectory(../algs libs/algs)
+add_subdirectory(algs libs/algs)
 
 # Use threads
 find_package(Threads)
