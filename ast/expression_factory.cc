@@ -1,4 +1,4 @@
-#include "header.hpp"
+#include "statement.h"
 
 using namespace std;
 using namespace termcolor;
@@ -40,18 +40,18 @@ void parseToken(const string& s, size_t& beg, size_t& end, E& e) {
         throw runtime_error("No assignment in assignment expression");
       e.assignment = {
           s.substr(beg + 1, eq - 2),
-          s.substr(eq+1, s.find("]", eq+1) - (eq+1)),
+          s.substr(eq + 1, s.find("]", eq + 1) - (eq + 1)),
       };
       break;
     case '(':  // Print
       if ((end = s.find(")", beg)) == string::npos)
         throw runtime_error("Unclosed square bracket");
-      e.to_print = s.substr(beg+1, s.find(")", beg)-2);
+      e.to_print = s.substr(beg + 1, s.find(")", beg) - 2);
       break;
     case '{':  // Condition
       if ((end = s.find("}", beg)) == string::npos)
         throw runtime_error("Unclosed curly bracket");
-      e.condition = s.substr(beg+1, s.find("}", beg)-2);
+      e.condition = s.substr(beg + 1, s.find("}", beg) - 2);
       break;
     default:
       throw runtime_error("Invalid line:\n" + s);
@@ -71,14 +71,11 @@ Expr expressionFactory(string s) {
     parseToken(s, beg, end, e);
   }
 
-  if (!e.condition.empty())
-    return Goto(e.label, e.condition);
-  if (!e.to_print.empty())
-    return Print(e.label, e.to_print);
+  if (!e.condition.empty()) return Goto(e.label, e.condition);
+  if (!e.to_print.empty()) return Print(e.label, e.to_print);
   if (!e.assignment.first.empty())
     return Assign(e.label, e.assignment.first, e.assignment.second);
-  if (!e.label.empty())
-    throw runtime_error("Wrong input");
+  if (!e.label.empty()) throw runtime_error("Wrong input");
   return BaseExpr(s);
 }
-}  // namespace program
+}  // namespace statement

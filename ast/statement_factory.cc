@@ -1,4 +1,4 @@
-#include "header.hpp"
+#include "statement.h"
 
 using namespace std;
 
@@ -29,7 +29,6 @@ tuple<Expr, Expr, Cond> splitConnection(string s) {
   return {expressionFactory(first), expressionFactory(second), cond};
 }
 
-
 pair<ParseTree, string> gen_parse_tree(list<string> s) {
   ParseTree t;
   string first;
@@ -54,11 +53,12 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
       t[get_label(left)].second = get_label(right);
     }
   }
-  std::cout << t << std::endl;
+  /* std::cout << t << std::endl; */
   return {t, first};
 }
 
-pair<Stmt, unordered_set<string>> parse_tree_to_statement(const ParseTree& t, const string& first) {
+pair<Stmt, unordered_set<string>> parse_tree_to_statement(const ParseTree& t,
+                                                          const string& first) {
   pair<Expr, string> cur = t.at(first);
   Stmt s;
   unordered_set<string> keys;

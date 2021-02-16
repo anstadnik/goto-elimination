@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Define project
 project(app CXX)
-file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cpp) 
+file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc ast/*.cc goto_elimination/*.cc) 
 include_directories(includes)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -45,13 +45,13 @@ endif()
 add_custom_target(
     copy-compile-commands ALL
     DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/../compile_commands.json
+        ${CMAKE_CURRENT_LIST_DIR}/compile_commands.json
     )
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_LIST_DIR}/../compile_commands.json
+    OUTPUT ${CMAKE_CURRENT_LIST_DIR}/compile_commands.json
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_BINARY_DIR}/compile_commands.json
-        ${CMAKE_CURRENT_LIST_DIR}/../compile_commands.json
+        ${CMAKE_CURRENT_LIST_DIR}/compile_commands.json
     DEPENDS
         # Unlike "proper" targets like executables and libraries, 
         # custom command / target pairs will not set up source

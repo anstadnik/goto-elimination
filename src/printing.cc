@@ -1,7 +1,4 @@
-#include <ostream>
-#include <vector>
-
-#include "statement.hpp"
+#include "statement.h"
 
 using namespace termcolor;
 
@@ -13,10 +10,11 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
   transform(t.begin(), t.end(), keys.begin(), key_selector);
   sort(keys.begin(), keys.end());
 
-  string head = ""
-    "/****************\n"
-    "*  PARSE TREE  * \n"
-    "****************/\n";
+  string head =
+      ""
+      "/****************\n"
+      "*  PARSE TREE  * \n"
+      "****************/\n";
 
   std::cout << head << std::endl;
 
@@ -24,12 +22,16 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
     visit([&os](auto&& expr) -> ostream& { return cout << expr; },
           t.at(i).first)
         << yellow << "goto "
-        << (t.at(i).second.size() ? t.at(i).second : "terminate") << reset << "\n";
+        << (t.at(i).second.size() ? t.at(i).second : "terminate") << reset
+        << "\n";
   return os;
 }
 
 ostream& operator<<(ostream& os, const BaseExpr& expr) {
   return os << green << expr.label << ": " << reset;
+}
+ostream& operator<<(ostream& os, const Expr& v) {
+  return visit([&os](auto&& expr) -> ostream& { return os << expr; }, v);
 }
 ostream& operator<<(ostream& os, const Assign& expr) {
   return os << static_cast<BaseExpr>(expr) << expr.var << "=" << expr.op
@@ -56,15 +58,9 @@ ostream& operator<<(ostream& os, const Goto& expr) {
             << ") {\ngoto " << expr.dest << ";\n}\n";
 }
 
-ostream& operator<<(ostream& os, const Expr& v) {
-  return visit([&os](auto&& expr) -> ostream& { return os << expr; }, v);
-}
-string get_label(const Expr& v) {
-  return visit([](auto&& expr) { return expr.label; }, v);
-}
-
 ostream& operator<<(ostream& os, const Stmt& stmt) {
-  for (const auto& e : stmt.s) visit([&os](auto&& expr) -> ostream& { return os << expr; }, e);
+  for (const auto& e : stmt.s)
+    visit([&os](auto&& expr) -> ostream& { return os << expr; }, e);
   return os;
 }
 
