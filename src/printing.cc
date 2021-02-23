@@ -6,7 +6,7 @@ namespace statement {
 ostream& operator<<(ostream& os, const statement::ParseTree& t) {
   vector<string> keys(t.size());
 
-  auto key_selector = [](auto pair) { return pair.first; };
+  auto key_selector = [](const auto& pair) -> string { return pair.first; };
   transform(t.begin(), t.end(), keys.begin(), key_selector);
   sort(keys.begin(), keys.end());
 
@@ -34,27 +34,27 @@ ostream& operator<<(ostream& os, const Expr& v) {
   return visit([&os](auto&& expr) -> ostream& { return os << expr; }, v);
 }
 ostream& operator<<(ostream& os, const Assign& expr) {
-  return os << static_cast<BaseExpr>(expr) << expr.var << "=" << expr.op
+  return os << static_cast<const BaseExpr&>(expr) << expr.var << "=" << expr.op
             << ";\n";
 }
 ostream& operator<<(ostream& os, const If& expr) {
-  return os << static_cast<BaseExpr>(expr) << "if (" << expr.condition
+  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.condition
             << ") {\n"
-            << expr.true_branch << "\n"
+            << *expr.true_branch << "\n"
             << "}\n";
 }
 ostream& operator<<(ostream& os, const While& expr) {
-  return os << static_cast<BaseExpr>(expr) << "while (" << expr.condition
+  return os << static_cast<const BaseExpr&>(expr) << "while (" << expr.condition
             << ") {\n"
-            << expr.body << "\n}\n";
+            << *expr.body << "\n}\n";
 }
 
 ostream& operator<<(ostream& os, const Print& expr) {
-  return os << static_cast<BaseExpr>(expr) << "cout << " << expr.var
+  return os << static_cast<const BaseExpr&>(expr) << "cout << " << expr.var
             << " << endl;\n";
 }
 ostream& operator<<(ostream& os, const Goto& expr) {
-  return os << static_cast<BaseExpr>(expr) << "if (" << expr.condition
+  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.condition
             << ") {\ngoto " << expr.dest << ";\n}\n";
 }
 

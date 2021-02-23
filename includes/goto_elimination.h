@@ -2,4 +2,4 @@
 
 #include "statement.h"
 
-statement::Stmt eliminateGoto(statement::Stmt stmt);
+statement::Stmt::ptr eliminateGoto(statement::Stmt::ptr stmt);

@@ -28,14 +28,14 @@ int main(int argc, char *argv[]) {
   const char *dummy[] = {"app", "inputs/complicated.txt", NULL};
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
-  statement::Stmt st = statement::statementFactory(s);
-  /* st = eliminateGoto(st); */
+  statement::Stmt::ptr st = statement::statementFactory(s);
+  st = eliminateGoto(move(st));
   /* std::cout << std::endl; */
-  std::cout << st << std::endl;
+  /* std::cout << st << std::endl; */
 
-  for (auto& expr : st) {
-    std::cout << expr << std::endl;
-  }
+  /* for (auto& expr : st) */ 
+  /*   std::cout << expr; */
+  
 
   return 0;
 }
