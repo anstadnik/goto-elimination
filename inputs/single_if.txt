@@ -1,0 +1,7 @@
+graph LR
+    A[a=0] --> B[b=0]
+    B --> C[a=a+1]
+    C --> D[b=b+1]
+    D --> E{b<42}
+    E -->|True| C
+    E -->|False| F(a)

@@ -4,12 +4,12 @@ using namespace std;
 
 namespace statement {
 
-void error(const Expr& e, string message) {
-  error(get_label(e), message);
-}
-
 void error(const string& expr_label, string message) {
   throw runtime_error(expr_label + ": " + message);
+}
+
+void error(const Expr& e, string message) {
+  error(get_label(e), message);
 }
 
 tuple<Expr, Expr, Cond> splitConnection(string s) {
@@ -68,41 +68,48 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
 
 Stmt::ptr parse_tree_to_statement(
     ParseTree& t, const string& first, unordered_set<string>& keys) {
-  pair<Expr, string>& cur = t.at(first);
-  Stmt::ptr s = make_unique<Stmt>();
-  /* unordered_set<string> keys; */
+  Stmt::ptr stmt = make_unique<Stmt>();
+  string cur_label = first;
 
   while (42) {
-    string next = cur.second;
-    if (get_label(cur.first) == "Q") next = cur.second;
-    if (keys.count(get_label(cur.first))) break;
-    if (holds_alternative<Goto>(cur.first)) {
-      string dest = get<Goto>(cur.first).dest,
-             cond = get<Goto>(cur.first).condition;
+    if (cur_label == "") break;
+    auto& [expr, next] = t.at(cur_label);
+    if (keys.count(cur_label)) break;
+    if (holds_alternative<Goto>(expr)) {
+      string dest = get<Goto>(expr).dest, cond = get<Goto>(expr).cond;
       if (keys.count(dest) && keys.count(next)) {
-        s->push_back(Goto(get_label(cur.first), cond, dest));
-        s->push_back(Goto("_" + get_label(cur.first), "true", next));
+        stmt->push_back(Goto(cur_label, cond, dest));
+        stmt->push_back(Goto("_" + cur_label, "true", next));
         break;
       }
       if (keys.count(dest))
-        s->push_back(Goto(get_label(cur.first), cond, dest));
+        stmt->push_back(Goto(cur_label, cond, dest));
       else if (keys.count(next)) {
-        s->push_back(Goto(get_label(cur.first), "!" + cond, next));
+        stmt->push_back(Goto(cur_label, "!" + cond, next));
         next = dest;
       } else {
-        auto lab = get_label(cur.first);
-        auto&& stmt = parse_tree_to_statement(t, dest, keys);
-        s->push_back(If(lab, cond, move(stmt)));
-        /* keys.insert(keys_.begin(), keys_.end()); */
+        auto lab = cur_label;
+        auto nested_stmt = parse_tree_to_statement(t, dest, keys);
+        copy(keys.begin(), keys.end(),
+             std::ostream_iterator<string>(std::cout, " "));
+        std::cout << std::endl;
+        stmt->push_back(If(lab, cond, move(nested_stmt)));
+        // We've added next to the nested_stmt
+        if (keys.count(next)) {
+          stmt->push_back(Goto("_" + cur_label, "true", next));
+          break;
+        }
       }
     } else
-      s->push_back(move(cur.first));
+      stmt->push_back(move(expr));
 
-    keys.insert(get_label(cur.first));
-    if (next == "") break;
-    cur = move(t.at(next));
+    keys.insert(cur_label);
+    cur_label = next;
   }
-  return move(s);
+  /* if (distance(stmt->begin(), stmt->end()) > 1) */
+  /*   std::cout << get_parent_stmt(*stmt->begin()) << std::endl; */
+  /* std::cout << *stmt << std::endl; */
+  return stmt;
 }
 
 Stmt::ptr parse_tree_to_statement(ParseTree& t, const string& first) {
@@ -116,6 +123,7 @@ Stmt::ptr statementFactory(list<string> s) {
   s.pop_front();
 
   auto [parse_tree, first] = gen_parse_tree(s);
+  std::cout << parse_tree << std::endl;
   auto stmt = parse_tree_to_statement(parse_tree, first);
   return stmt;
 }

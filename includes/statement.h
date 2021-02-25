@@ -13,7 +13,6 @@
 
 #include "algs/algs.h"
 
-
 using namespace std;
 
 namespace statement {
@@ -27,8 +26,9 @@ class If;
 class While;
 class Print;
 class Goto;
+class Break;
 
-typedef variant<BaseExpr, Assign, If, While, Print, Goto> Expr;
+typedef variant<BaseExpr, Assign, If, While, Print, Goto, Break> Expr;
 
 /**********************************
  *  Base class for an expression  *
@@ -68,10 +68,11 @@ class Stmt {
  public:
   using ptr = unique_ptr<Stmt>;
   struct Iterator;
-  Expr* parent_stmt = nullptr;
+  Expr* parent_expr = nullptr;
 
   Stmt(Expr* = nullptr);
-  Stmt(list<Expr>, Expr* = nullptr);
+  Stmt(list<Expr>&&, Expr* = nullptr);
+  Stmt(Expr&&, Expr* = nullptr);
   Stmt(const Stmt&) = default;
   Stmt(Stmt&&) = default;
 
@@ -80,7 +81,7 @@ class Stmt {
 
   ~Stmt() = default;
 
-  void insert(const string& parent, Expr expr);
+  void insert(const string& parent, Expr expr, bool after);
   void push_back(Expr&& expr);
   void remove(const string& label);
   void replace(string pattern, Expr& replacement);
@@ -115,7 +116,6 @@ class Assign : public BaseExpr {
   /* Assign& operator=(const Assign&) = default; */
   Assign& operator=(Assign&&) = default;
 
-
   friend ostream& operator<<(ostream& os, const Assign& a);
 
   virtual ~Assign() = default;
@@ -124,16 +124,18 @@ class Assign : public BaseExpr {
 class If : public BaseExpr {
  public:
   Stmt::ptr true_branch;
-  string condition;
+  string cond;
 
-  If(string label, string condition, Stmt::ptr true_branch);
+  If(string label, string condition, Stmt::ptr true_branch)
+      : BaseExpr(move(label)),
+        cond(move(condition)),
+        true_branch(move(true_branch)) {}
   If() = default;
   /* If(const If&) = default; */
   If(If&&) = default;
 
   /* If& operator=(const If&) = default; */
   If& operator=(If&&) = default;
-  
 
   friend ostream& operator<<(ostream& os, const If& a);
 
@@ -143,16 +145,16 @@ class If : public BaseExpr {
 class While : public BaseExpr {
  public:
   Stmt::ptr body;
-  string condition;
+  string cond;
 
-  While(string label, Stmt::ptr body, string condition);
+  While(string label, Stmt::ptr body, string condition)
+      : BaseExpr(move(label)), body(move(body)), cond(move(condition)) {}
   While() = default;
   /* While(const While&) = default; */
   While(While&&) = default;
 
   /* While& operator=(const While&) = default; */
   While& operator=(While&&) = default;
-  
 
   friend ostream& operator<<(ostream& os, const While& a);
 
@@ -170,7 +172,6 @@ class Print : public BaseExpr {
 
   /* Print& operator=(const Print&) = default; */
   Print& operator=(Print&&) = default;
-  
 
   friend ostream& operator<<(ostream& os, const Print& a);
 
@@ -180,24 +181,39 @@ class Print : public BaseExpr {
 class Goto : public BaseExpr {
  public:
   string dest;
-  string condition;
+  string cond;
 
-  Goto(string label, string condition, string dest = "")
-      : BaseExpr(move(label)), condition(move(condition)), dest(move(dest)){};
+  Goto(string label, string cond, string dest = "")
+      : BaseExpr(move(label)), cond(move(cond)), dest(move(dest)){};
   Goto() = default;
   /* Goto(const Goto&) = default; */
   Goto(Goto&&) = default;
 
   /* Goto& operator=(const Goto&) = default; */
   Goto& operator=(Goto&&) = default;
-    /* template <class T> */
+  /* template <class T> */
   /* bool operator==(const T& other) { */
-    /* return BaseExpr::operator==(static_cast<BaseExpr&>(other)); */
+  /* return BaseExpr::operator==(static_cast<BaseExpr&>(other)); */
   /* } */
 
   friend ostream& operator<<(ostream& os, const Goto& a);
 
   virtual ~Goto() = default;
+};
+
+class Break : public BaseExpr {
+ public:
+  Break(string label) : BaseExpr(move(label)){};
+  Break() = default;
+  /* Break(const Break&) = default; */
+  Break(Break&&) = default;
+
+  /* Break& operator=(const Break&) = default; */
+  Break& operator=(Break&&) = default;
+
+  friend ostream& operator<<(ostream& os, const Break& a);
+
+  virtual ~Break() = default;
 };
 
 /******************
@@ -209,16 +225,20 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t);
 
 ostream& operator<<(ostream& os, const Expr& v);
 string get_label(const Expr& v);
+/* Stmt* get_parent_stmt(const Expr& v); */
 Stmt* get_parent_stmt(const Expr& v);
-Expr* get_parent_stmt(const Stmt& v);
+Expr* get_parent_expr(const Stmt& v);
+Expr* get_parent_expr(const Expr& v);
 void set_parent_stmt(Expr& v, Stmt* parent_stmt);
+void set_parent_expr(Stmt& v, Expr* parent_expr);
 
 Expr expressionFactory(string s);
 Stmt::ptr statementFactory(list<string> s);
 
 template <typename T, enable_if_t<is_base_of<BaseExpr, T>::value, bool> = true>
 bool operator==(const T& first, const T& second) {
-  return static_cast<const BaseExpr&>(first) == static_cast<const BaseExpr&>(second);
+  return static_cast<const BaseExpr&>(first) ==
+         static_cast<const BaseExpr&>(second);
 }
 
 /**************************

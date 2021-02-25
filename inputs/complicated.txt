@@ -6,7 +6,9 @@ graph LR
     E -->|True| C
     E -->|False| F(a)
     F --> O{b>=1000}
-    O -->|True| Q
+    O -->|True| Q{b>100}
+    Q -->|True| J("HELLO")
+    Q -->|False| K("WORLD")
     O -->|False| G{a%5==0}
     G -->|False| B
     G -->|True| H{a < 500}

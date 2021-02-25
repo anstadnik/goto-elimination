@@ -23,15 +23,16 @@ std::string parseArgs(int argc, const char *argv[]) {
 
 int main(int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
+  icecream::ic.include_context(true);
 
   /* string fn = ParseArgs(argc, argv); */
-  const char *dummy[] = {"app", "inputs/complicated.txt", NULL};
+  const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL};
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
   statement::Stmt::ptr st = statement::statementFactory(s);
-  st = eliminateGoto(move(st));
   /* std::cout << std::endl; */
-  /* std::cout << st << std::endl; */
+  /* std::cout << *st << std::endl; */
+  st = eliminateGoto(move(st));
 
   /* for (auto& expr : st) */ 
   /*   std::cout << expr; */

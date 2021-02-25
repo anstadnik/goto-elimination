@@ -1,0 +1,7 @@
+graph LR
+    B{1} -->|True| Q{0}
+    B -->|False| R("WORLD")
+    Q -->|True| J("HELLO")
+    Q -->|False| O{1}
+    O -->|True| R
+    O -->|False| M

@@ -23,7 +23,7 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
           t.at(i).first)
         << yellow << "goto "
         << (t.at(i).second.size() ? t.at(i).second : "terminate") << reset
-        << "\n";
+        << "\n-------\n";
   return os;
 }
 
@@ -38,13 +38,12 @@ ostream& operator<<(ostream& os, const Assign& expr) {
             << ";\n";
 }
 ostream& operator<<(ostream& os, const If& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.condition
-            << ") {\n"
-            << *expr.true_branch << "\n"
-            << "}\n";
+  return os << static_cast<const BaseExpr&>(expr) << termcolor::dark << "if ("
+            << expr.cond << ")" << reset << " {\n"
+            << *expr.true_branch << "}\n";
 }
 ostream& operator<<(ostream& os, const While& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "while (" << expr.condition
+  return os << static_cast<const BaseExpr&>(expr) << "while (" << expr.cond
             << ") {\n"
             << *expr.body << "\n}\n";
 }
@@ -54,11 +53,22 @@ ostream& operator<<(ostream& os, const Print& expr) {
             << " << endl;\n";
 }
 ostream& operator<<(ostream& os, const Goto& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.condition
-            << ") {\ngoto " << expr.dest << ";\n}\n";
+  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.cond
+            << ") {\n" << cyan << "goto " << reset << expr.dest << ";\n}\n";
+}
+ostream& operator<<(ostream& os, const Break& expr) {
+  return os << static_cast<const BaseExpr&>(expr) << "break;"
+            << " << endl;\n";
 }
 
 ostream& operator<<(ostream& os, const Stmt& stmt) {
+  string head = 
+    "/***************\n"
+    "*  Statement   *\n"
+    "***************/\n";
+
+  if (!stmt.parent_expr)
+    std::cout << head << std::endl;
   for (const auto& e : stmt.s)
     visit([&os](auto&& expr) -> ostream& { return os << expr; }, e);
   return os;
