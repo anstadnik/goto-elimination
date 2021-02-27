@@ -25,35 +25,33 @@ void set_parent_expr(Stmt& v, Expr* parent_expr) {
   v.parent_expr = parent_expr;
 }
 
+Stmt * get_nested_stmt(const Expr& p) {
+  if (auto i = get_if<If>(&p))
+    return i->true_branch->size() ? i->true_branch.get() : nullptr;
+  else if (auto i = get_if<While>(&p))
+    return i->body->size() ? i->body.get() : nullptr;
+  return nullptr;
+}
+
 bool Stmt::Iterator::ensure_not_end() {
-  auto next = it;
-  next++;
-  if (next == get_parent_stmt(*it)->end()) {
-    if (auto i = get_parent_stmt(*get_parent_expr(*it)))
-    {
-      string parent_expr_label = get_label(*get_parent_expr(*it));
-      it = i->find(parent_expr_label).it;
-      return ensure_not_end();
-    }
-    else
-      return false;
+  // If reached the end of the current statement, try to go to upper level
+  if (!history.empty() && ++pointer(it) == get_parent_stmt(*it)->end()) {
+    it = history.top();
+    history.pop();
+    return ensure_not_end();
   }
+
   return true;
 }
 
 Stmt::Iterator& Stmt::Iterator::operator++() {
-  if (auto i = get_if<If>(&*it))
-    it = i->true_branch->begin().it;
-  else if (auto i = get_if<While>(&*it))
-    it = i->body->begin().it;
-
-  // If reached the end of the current statement, try to go to upper level
-  if (!ensure_not_end())
+  if (auto i = get_nested_stmt(*it)) {
+    history.push(it);
+    it = i->begin().it;
     return *this;
-
+  }
+  ensure_not_end();
   ++it;
-
-
   return *this;
 }
 

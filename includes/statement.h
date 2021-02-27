@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <algorithm>
 #include <cassert>
 #include <list>
@@ -10,6 +11,7 @@
 #include <unordered_set>
 #include <utility>
 #include <variant>
+#include <stack>
 
 #include "algs/algs.h"
 
@@ -91,6 +93,7 @@ class Stmt {
 
   Iterator begin();
   Iterator end();
+  size_t size() const {return s.size();};
   bool empty() const;
 
   Iterator move_outward(const Iterator& it);
@@ -292,6 +295,7 @@ class Stmt::Iterator {
 
  private:
   pointer it;
+  stack<pointer> history;
 };
 
 template <class T>

@@ -34,15 +34,11 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
   /*   string label = "_goto_" + get_label(expr); */
   /*   stmt->insert(get_label(expr), Assign(label, label, "0"), true); */
   /* } */
-  cout << stmt << endl;
   /* IC(get<Goto>(*g).dest); */
-  for (auto& i : *stmt) {
-    cout << get_label(i) << endl;
-  }
 
-  for (auto& i : *stmt) {
-    std::cout << *get_parent_stmt(i) << std::endl;
-  }
+  /* for (auto& i : *stmt) { */
+  /*   std::cout << *get_parent_stmt(i) << std::endl; */
+  /* } */
 
   /* eliminate gotos */
   /* while not empty(goto _li st) do { */
