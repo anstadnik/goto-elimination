@@ -40,8 +40,20 @@ Stmt::Stmt(Expr&& e, Expr* parent_stmt) {
 }
 
 Stmt::Iterator Stmt::find(const string& label) {
-  return std::find_if(this->begin(), this->end(),
-                [&label](const Expr& e) { return get_label(e) == label; });
+  IC();
+  for (auto& i : *this) {
+    std::cout << i << std::endl;
+  }
+  IC();
+  for (Stmt::Iterator i = begin(); i != end(); i++) {
+    std::cout << *i << " | " << get_label(*i) << std::endl;
+    if (get_label(*i) == label)
+      return i;
+  }
+  IC();
+  return end();
+  /* return std::find_if(this->begin(), this->end(), */
+  /*               [&label](const Expr& e) { return get_label(e) == label; }); */
 }
 
 Stmt::Iterator Stmt::begin() { return Iterator(move(s.begin())); }

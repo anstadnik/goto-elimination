@@ -25,17 +25,34 @@ void set_parent_expr(Stmt& v, Expr* parent_expr) {
   v.parent_expr = parent_expr;
 }
 
-Stmt::Iterator& Stmt::Iterator::operator++() {
-  // If reached the end of the current statement, try to go to upper level
-  if (it == get_parent_stmt(*it)->end()) {
+bool Stmt::Iterator::ensure_not_end() {
+  auto next = it;
+  next++;
+  if (next == get_parent_stmt(*it)->end()) {
     if (auto i = get_parent_stmt(*get_parent_expr(*it)))
-      it = i->begin().it;
-    else if (auto i = get_if<If>(&*it))
-      it = i->true_branch->begin().it;
-    else if (auto i = get_if<While>(&*it))
-      it = i->body->begin().it;
-  } else
-    ++it;
+    {
+      string parent_expr_label = get_label(*get_parent_expr(*it));
+      it = i->find(parent_expr_label).it;
+      return ensure_not_end();
+    }
+    else
+      return false;
+  }
+  return true;
+}
+
+Stmt::Iterator& Stmt::Iterator::operator++() {
+  if (auto i = get_if<If>(&*it))
+    it = i->true_branch->begin().it;
+  else if (auto i = get_if<While>(&*it))
+    it = i->body->begin().it;
+
+  // If reached the end of the current statement, try to go to upper level
+  if (!ensure_not_end())
+    return *this;
+
+  ++it;
+
 
   return *this;
 }

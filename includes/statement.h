@@ -245,7 +245,10 @@ bool operator==(const T& first, const T& second) {
  *  Statement's iterator  *
  **************************/
 
-struct Stmt::Iterator {
+class Stmt::Iterator {
+  private:
+    bool ensure_not_end();
+  public:
   using iterator_category = std::forward_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = Expr;

@@ -90,9 +90,6 @@ Stmt::ptr parse_tree_to_statement(
       } else {
         auto lab = cur_label;
         auto nested_stmt = parse_tree_to_statement(t, dest, keys);
-        copy(keys.begin(), keys.end(),
-             std::ostream_iterator<string>(std::cout, " "));
-        std::cout << std::endl;
         stmt->push_back(If(lab, cond, move(nested_stmt)));
         // We've added next to the nested_stmt
         if (keys.count(next)) {
@@ -123,7 +120,7 @@ Stmt::ptr statementFactory(list<string> s) {
   s.pop_front();
 
   auto [parse_tree, first] = gen_parse_tree(s);
-  std::cout << parse_tree << std::endl;
+  /* std::cout << parse_tree << std::endl; */
   auto stmt = parse_tree_to_statement(parse_tree, first);
   return stmt;
 }
