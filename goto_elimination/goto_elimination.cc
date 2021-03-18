@@ -8,20 +8,22 @@ using namespace statement;
 using namespace std;
 
 bool indirectly_related(const Stmt::Iterator& g, const Stmt::Iterator& l) {
-  for (auto parent = get_parent_stmt(*g); parent;
-       parent = get_parent_stmt(*parent->parent_expr))
-    if (get_parent_stmt(*l) == parent) return false;
-  for (auto parent = get_parent_stmt(*l); parent;
-       parent = get_parent_stmt(*parent->parent_expr))
-    if (get_parent_stmt(*g) == parent) return false;
+  /* if (!get_parent_stmt(*g) || !get_parent_stmt(*l)) */
+  /*   return false; */
+  for (auto parent = getParentStmt(*g); parent;
+       parent = getParentStmt(*parent))
+    if (getParentStmt(*l) == parent) return false;
+  for (auto parent = getParentStmt(*l); parent;
+       parent = getParentStmt(*parent))
+    if (getParentStmt(*l) == parent) return false;
   return true;
 }
 
 Stmt* get_common_parent(const Stmt::Iterator& a, const Stmt::Iterator& b) {
-  for (auto parent_a = get_parent_stmt(*a); parent_a;
-       parent_a = get_parent_stmt(*parent_a->parent_expr))
-    for (auto parent_b = get_parent_stmt(*b); parent_b;
-         parent_b = get_parent_stmt(*parent_b->parent_expr))
+  for (auto parent_a = getParentStmt(*a); parent_a;
+       parent_a = getParentStmt(*parent_a))
+    for (auto parent_b = getParentStmt(*b); parent_b;
+         parent_b = getParentStmt(*parent_b))
       if (parent_a == parent_b) return parent_a;
   return nullptr;
 }
@@ -36,12 +38,10 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
   /* } */
   /* IC(get<Goto>(*g).dest); */
 
-  /* for (auto& i : *stmt) { */
-  /*   std::cout << *get_parent_stmt(i) << std::endl; */
-  /* } */
-
   /* eliminate gotos */
   /* while not empty(goto _li st) do { */
+  /* std::cout << *stmt << std::endl; */
+  /* exit(0); */
   for (auto g = stmt->find_type<Goto>(); g != stmt->end();
        g = stmt->find_type<Goto>()) {
     /* select the next goto/label pair */
@@ -52,13 +52,16 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
     /* force g and l to be directly related */
 
     /* if indirectly related(g, l) */
+    std::cout << *g << std::endl;
+    std::cout << *l << std::endl;
     if (indirectly_related(g, l)) {
       auto parent = get_common_parent(g, l);
       // Can be if or switch. Since I don't have switch...
-      if (holds_alternative<If>(*get_parent_expr(*parent)))
-        while (get_parent_stmt(*g) != parent) {
+      if (holds_alternative<If>(*getParentExpr(*parent)))
+        while (getParentStmt(*g) != parent) {
           g = stmt->move_outward(g);
           cout << stmt << endl;
+          cin.get();
         }
       // Here could be logic for the case when g and l are in different
       // statements (functions)

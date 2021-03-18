@@ -9,7 +9,7 @@ void error(const string& expr_label, string message) {
 }
 
 void error(const Expr& e, string message) {
-  error(get_label(e), message);
+  error(getLabel(e), message);
 }
 
 tuple<Expr, Expr, Cond> splitConnection(string s) {
@@ -39,7 +39,7 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
 
   for (const auto& e : s) {
     auto [left, right, cond] = splitConnection(e);
-    string left_label = get_label(left), right_label = get_label(right);
+    string left_label = getLabel(left), right_label = getLabel(right);
     if (!t.size()) {
       t.emplace(piecewise_construct, forward_as_tuple(left_label), forward_as_tuple(move(left), ""));
       first = left_label;

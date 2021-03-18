@@ -1,10 +1,10 @@
 #include <iterator>
 
 #define BACKWARD_HAS_DW 1
+#include "algs/algs.h"
 #include "goto_elimination.h"
 #include "statement.h"
-
-#include "algs/algs.h"
+#include "tests.h"
 
 namespace backward {
 backward::SignalHandling sh;
@@ -29,14 +29,16 @@ int main(int argc, char *argv[]) {
   const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL};
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
+  for (const auto &l : s) std::cout << l << std::endl;
+
   statement::Stmt::ptr st = statement::statementFactory(s);
-  /* std::cout << std::endl; */
-  /* std::cout << *st << std::endl; */
+  std::cout << *st << std::endl;
+  tests::TestStmt::run_all(*st);
+
   st = eliminateGoto(move(st));
 
-  /* for (auto& expr : st) */ 
+  /* for (auto& expr : st) */
   /*   std::cout << expr; */
-  
 
   return 0;
 }

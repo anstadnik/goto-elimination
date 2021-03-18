@@ -6,9 +6,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # CPP params
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	# string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
-	# string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -ftime-trace")
-	# string(APPEND CMAKE_LINKER_FLAGS_RELWITHDEBINFO " -fno-omit-frame-pointer -fsanitize=address")
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+	# set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+  # string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
+  # string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=undefined")
+  string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=undefined")
+	# string(APPEND CMAKE_CXX_FLAGS_DEBUG " -ftime-trace")
 endif()
 
 # Set cmake standard
@@ -17,7 +23,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Define project
 project(app CXX)
-file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc ast/*.cc goto_elimination/*.cc) 
+file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  src/*.cc ast/*.cc goto_elimination/*.cc tests/*.cc) 
 include_directories(includes)
 
 add_executable(${PROJECT_NAME} ${SOURCES})

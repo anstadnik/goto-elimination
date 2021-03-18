@@ -17,6 +17,10 @@
 
 using namespace std;
 
+namespace tests {
+  class TestStmt;
+}
+
 namespace statement {
 
 enum class Cond { None, True, False };
@@ -37,8 +41,9 @@ typedef variant<BaseExpr, Assign, If, While, Print, Goto, Break> Expr;
  **********************************/
 
 class BaseExpr {
- public:
   Stmt* parent_stmt = nullptr;
+ public:
+  Stmt* getParentStmt() const;
   string label;
 
   BaseExpr(string label) : label(move(label)) {}
@@ -47,7 +52,7 @@ class BaseExpr {
   BaseExpr(BaseExpr&&) = default;
 
   /* BaseExpr& operator=(const BaseExpr&) = default; */
-  BaseExpr& operator=(BaseExpr&&) = default;
+  /* BaseExpr& operator=(BaseExpr&&) = default; */
 
   bool operator==(const BaseExpr&) const = default;
 
@@ -56,6 +61,8 @@ class BaseExpr {
   friend ostream& operator<<(ostream&, const BaseExpr&);
 
   friend class Stmt;
+  /* friend Stmt* getParentStmt(const Expr& v); */
+  friend void setParentStmt(Expr& v, Stmt* parent_stmt);
 };
 
 /***************
@@ -66,20 +73,22 @@ class Stmt {
  private:
   // Possible UB, Expr is not defined
   list<Expr> s;
-
- public:
-  using ptr = unique_ptr<Stmt>;
-  struct Iterator;
   Expr* parent_expr = nullptr;
 
-  Stmt(Expr* = nullptr);
+ public:
+  /* Expr* getParentExpr() const; */
+  using ptr = unique_ptr<Stmt>;
+  struct Iterator;
+
+  /* Stmt(Expr* = nullptr); */
+  Stmt() = default;
   Stmt(list<Expr>&&, Expr* = nullptr);
   Stmt(Expr&&, Expr* = nullptr);
   Stmt(const Stmt&) = default;
   Stmt(Stmt&&) = default;
 
-  Stmt& operator=(const Stmt&) = default;
-  Stmt& operator=(Stmt&&) = default;
+  /* Stmt& operator=(const Stmt&) = default; */
+  /* Stmt& operator=(Stmt&&) = default; */
 
   ~Stmt() = default;
 
@@ -99,6 +108,9 @@ class Stmt {
   Iterator move_outward(const Iterator& it);
 
   friend ostream& operator<<(ostream& os, const Stmt& a);
+  friend void setParentExpr(Stmt& v, Expr* parent_stmt);
+  friend Expr* getParentExpr(const Stmt& v);
+  friend class tests::TestStmt;
 };
 
 /*******************************
@@ -117,7 +129,7 @@ class Assign : public BaseExpr {
   Assign(Assign&&) = default;
 
   /* Assign& operator=(const Assign&) = default; */
-  Assign& operator=(Assign&&) = default;
+  /* Assign& operator=(Assign&&) = default; */
 
   friend ostream& operator<<(ostream& os, const Assign& a);
 
@@ -138,7 +150,7 @@ class If : public BaseExpr {
   If(If&&) = default;
 
   /* If& operator=(const If&) = default; */
-  If& operator=(If&&) = default;
+  /* If& operator=(If&&) = default; */
 
   friend ostream& operator<<(ostream& os, const If& a);
 
@@ -157,7 +169,7 @@ class While : public BaseExpr {
   While(While&&) = default;
 
   /* While& operator=(const While&) = default; */
-  While& operator=(While&&) = default;
+  /* While& operator=(While&&) = default; */
 
   friend ostream& operator<<(ostream& os, const While& a);
 
@@ -174,7 +186,7 @@ class Print : public BaseExpr {
   Print(Print&&) = default;
 
   /* Print& operator=(const Print&) = default; */
-  Print& operator=(Print&&) = default;
+  /* Print& operator=(Print&&) = default; */
 
   friend ostream& operator<<(ostream& os, const Print& a);
 
@@ -193,7 +205,7 @@ class Goto : public BaseExpr {
   Goto(Goto&&) = default;
 
   /* Goto& operator=(const Goto&) = default; */
-  Goto& operator=(Goto&&) = default;
+  /* Goto& operator=(Goto&&) = default; */
   /* template <class T> */
   /* bool operator==(const T& other) { */
   /* return BaseExpr::operator==(static_cast<BaseExpr&>(other)); */
@@ -212,7 +224,7 @@ class Break : public BaseExpr {
   Break(Break&&) = default;
 
   /* Break& operator=(const Break&) = default; */
-  Break& operator=(Break&&) = default;
+  /* Break& operator=(Break&&) = default; */
 
   friend ostream& operator<<(ostream& os, const Break& a);
 
@@ -227,13 +239,14 @@ typedef unordered_map<string, pair<Expr, string>> ParseTree;
 ostream& operator<<(ostream& os, const statement::ParseTree& t);
 
 ostream& operator<<(ostream& os, const Expr& v);
-string get_label(const Expr& v);
+string getLabel(const Expr& v);
 /* Stmt* get_parent_stmt(const Expr& v); */
-Stmt* get_parent_stmt(const Expr& v);
-Expr* get_parent_expr(const Stmt& v);
-Expr* get_parent_expr(const Expr& v);
-void set_parent_stmt(Expr& v, Stmt* parent_stmt);
-void set_parent_expr(Stmt& v, Expr* parent_expr);
+Stmt* getParentStmt(const Stmt& v);
+Stmt* getParentStmt(const Expr& v);
+Expr* getParentExpr(const Stmt& v);
+Expr* getParentExpr(const Expr& v);
+void setParentStmt(Expr& v, Stmt* parent_stmt);
+void setParentExpr(Stmt& v, Expr* parent_expr);
 
 Expr expressionFactory(string s);
 Stmt::ptr statementFactory(list<string> s);
@@ -275,6 +288,7 @@ class Stmt::Iterator {
 
   reference operator*() const { return *it; }
   pointer operator->() { return it; }
+  const pointer operator->() const { return it; }
 
   // Prefix increment
   Iterator& operator++();

@@ -27,37 +27,53 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
   return os;
 }
 
+string getIndent(const BaseExpr* e) {
+  const Expr* p = getParentExpr(*e->getParentStmt());
+  if (!p)
+    return "";
+  size_t indent = 2;
+  while ((p = getParentExpr(*p)))
+    indent += 2;
+  return string(indent, ' ');
+}
+
 ostream& operator<<(ostream& os, const BaseExpr& expr) {
-  return os << green << expr.label << ": " << reset;
+  return os << green << setw(4) << left << expr.label + ":" << reset;
 }
 ostream& operator<<(ostream& os, const Expr& v) {
   return visit([&os](auto&& expr) -> ostream& { return os << expr; }, v);
 }
 ostream& operator<<(ostream& os, const Assign& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << expr.var << "=" << expr.op
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << expr.var << "=" << expr.op
             << ";\n";
 }
 ostream& operator<<(ostream& os, const If& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << termcolor::dark << "if ("
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << termcolor::dark << "if ("
             << expr.cond << ")" << reset << " {\n"
-            << *expr.true_branch << "}\n";
+            << *expr.true_branch << i << "    " << "}\n";
 }
 ostream& operator<<(ostream& os, const While& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "while (" << expr.cond
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << "while (" << expr.cond
             << ") {\n"
-            << *expr.body << "\n}\n";
+            << *expr.body << i << "    " << "\n}\n";
 }
 
 ostream& operator<<(ostream& os, const Print& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "cout << " << expr.var
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << "cout << " << expr.var
             << " << endl;\n";
 }
 ostream& operator<<(ostream& os, const Goto& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "if (" << expr.cond
-            << ") {\n" << cyan << "goto " << reset << expr.dest << ";\n}\n";
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << "if (" << expr.cond
+            << ") {" << " " << cyan << "goto " << reset << expr.dest << "; }\n";
 }
 ostream& operator<<(ostream& os, const Break& expr) {
-  return os << static_cast<const BaseExpr&>(expr) << "break;"
+  const string i = getIndent(&expr);
+  return os << static_cast<const BaseExpr&>(expr) << i << "break;"
             << " << endl;\n";
 }
 
