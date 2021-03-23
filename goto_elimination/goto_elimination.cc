@@ -1,31 +1,49 @@
 #include "goto_elimination.h"
+
 #include <array>
 #include <iostream>
 #include <variant>
-#include "statement.h"
 
 using namespace statement;
 using namespace std;
 
 bool indirectly_related(const Stmt::Iterator& g, const Stmt::Iterator& l) {
-  /* if (!get_parent_stmt(*g) || !get_parent_stmt(*l)) */
-  /*   return false; */
-  for (auto parent = getParentStmt(*g); parent;
-       parent = getParentStmt(*parent))
-    if (getParentStmt(*l) == parent) return false;
-  for (auto parent = getParentStmt(*l); parent;
-       parent = getParentStmt(*parent))
-    if (getParentStmt(*l) == parent) return false;
+  for (auto parent = g->par_stmt; parent->par_expr;
+       parent = parent->par_expr->par_stmt)
+    if (l->par_stmt == parent) return false;
+  for (auto parent = l->par_stmt; parent->par_expr;
+       parent = parent->par_expr->par_stmt)
+    if (l->par_stmt == parent) return false;
   return true;
 }
 
 Stmt* get_common_parent(const Stmt::Iterator& a, const Stmt::Iterator& b) {
-  for (auto parent_a = getParentStmt(*a); parent_a;
-       parent_a = getParentStmt(*parent_a))
-    for (auto parent_b = getParentStmt(*b); parent_b;
-         parent_b = getParentStmt(*parent_b))
+  for (auto parent_a = a->par_stmt; parent_a->par_expr;
+       parent_a = parent_a->par_expr->par_stmt)
+    for (auto parent_b = b->par_stmt; parent_b->par_expr;
+         parent_b = parent_b->par_expr->par_stmt)
       if (parent_a == parent_b) return parent_a;
   return nullptr;
+}
+
+Stmt::Iterator move_outward(Stmt::Iterator it) {
+  assert(holds_alternative<Goto>(it->contents));
+
+  const Goto& e = get<Goto>(it->contents);
+  Stmt& parent = *it->par_stmt;
+  if (holds_alternative<If>(parent.par_expr->contents)) {
+    string bool_name = "_cond_" + it->label;
+    // Insert condition
+    parent.insert(it->label, Expr(bool_name, Assign{bool_name, e.cond}));
+    // Put everything after the goto in If
+    parent.insert(it->label, Expr("_if_" + it->label,
+                                  If{parent.extract_from(it, parent.end()),
+                                     "!" + bool_name}));
+  } else if (holds_alternative<While>(it->contents)) {
+    throw runtime_error("Not implemented");
+  } else
+    throw runtime_error("I don't know this type of expression");
+  return it;
 }
 
 Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
@@ -47,20 +65,18 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
     /* select the next goto/label pair */
     /* g := select a goto from goto_list */
     /* l := label matching g */
-    auto l = stmt->find(get<Goto>(*g).dest);
+    auto l = stmt->find(get<Goto>(g->contents).dest);
 
     /* force g and l to be directly related */
 
     /* if indirectly related(g, l) */
-    std::cout << *g << std::endl;
-    std::cout << *l << std::endl;
     if (indirectly_related(g, l)) {
       auto parent = get_common_parent(g, l);
       // Can be if or switch. Since I don't have switch...
-      if (holds_alternative<If>(*getParentExpr(*parent)))
-        while (getParentStmt(*g) != parent) {
-          g = stmt->move_outward(g);
-          cout << stmt << endl;
+      if (holds_alternative<If>(parent->par_expr->contents))
+        while (g->par_stmt != parent) {
+          g = move_outward(g);
+          cout << *stmt << endl;
           cin.get();
         }
       // Here could be logic for the case when g and l are in different
@@ -69,6 +85,9 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
         throw runtime_error(
             "Indirectly related, but not through an if statement");
     }
+    std::cout << g->label << " and " << l->label << " are directly related " << std::endl;
+    std::cout << *stmt << std::endl;
+    break;
     /* then if different_statements(g ,l) then */
     /* move g out using outward-movement transf. */
     /* until it becomes directly related to l */

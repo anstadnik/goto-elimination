@@ -1,14 +1,15 @@
-#include "statement.h"
+#include "ast.h"
+
 
 using namespace termcolor;
 
 namespace statement {
 ostream& operator<<(ostream& os, const statement::ParseTree& t) {
-  vector<string> keys(t.size());
+  /* vector<string> keys(t.size()); */
 
-  auto key_selector = [](const auto& pair) -> string { return pair.first; };
-  transform(t.begin(), t.end(), keys.begin(), key_selector);
-  sort(keys.begin(), keys.end());
+  /* auto key_selector = [](const auto& pair) -> string { return pair.first; }; */
+  /* transform(t.begin(), t.end(), keys.begin(), key_selector); */
+  /* sort(keys.begin(), keys.end()); */
 
   string head =
       ""
@@ -18,63 +19,48 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
 
   std::cout << head << std::endl;
 
-  for (auto i : keys)
-    visit([&os](auto&& expr) -> ostream& { return cout << expr; },
-          t.at(i).first)
-        << yellow << "goto "
-        << (t.at(i).second.size() ? t.at(i).second : "terminate") << reset
-        << "\n-------\n";
+  /* for (auto i : keys) */
+  for (const auto& i : t)
+    os << t.at(i.first).first << yellow << "goto "
+        << (t.at(i.first).second.size() ? t.at(i.first).second : "terminate")
+        << reset << "\n-------\n";
   return os;
 }
 
-string getIndent(const BaseExpr* e) {
-  const Expr* p = getParentExpr(*e->getParentStmt());
+string getIndent(const Expr& e) {
+  if (!e.par_stmt)
+    return "";
+  const Expr* p = e.par_stmt->par_expr;
   if (!p)
     return "";
   size_t indent = 2;
-  while ((p = getParentExpr(*p)))
+  while ((p = p->par_stmt->par_expr))
     indent += 2;
   return string(indent, ' ');
 }
 
-ostream& operator<<(ostream& os, const BaseExpr& expr) {
-  return os << green << setw(4) << left << expr.label + ":" << reset;
-}
-ostream& operator<<(ostream& os, const Expr& v) {
-  return visit([&os](auto&& expr) -> ostream& { return os << expr; }, v);
-}
-ostream& operator<<(ostream& os, const Assign& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << expr.var << "=" << expr.op
-            << ";\n";
-}
-ostream& operator<<(ostream& os, const If& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << termcolor::dark << "if ("
-            << expr.cond << ")" << reset << " {\n"
-            << *expr.true_branch << i << "    " << "}\n";
-}
-ostream& operator<<(ostream& os, const While& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << "while (" << expr.cond
-            << ") {\n"
-            << *expr.body << i << "    " << "\n}\n";
-}
+ostream& operator<<(ostream& os, const Expr& expr) {
+  os << green << setw(4) << left << expr.label + ":" << reset;
 
-ostream& operator<<(ostream& os, const Print& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << "cout << " << expr.var
-            << " << endl;\n";
-}
-ostream& operator<<(ostream& os, const Goto& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << "if (" << expr.cond
-            << ") {" << " " << cyan << "goto " << reset << expr.dest << "; }\n";
-}
-ostream& operator<<(ostream& os, const Break& expr) {
-  const string i = getIndent(&expr);
-  return os << static_cast<const BaseExpr&>(expr) << i << "break;"
-            << " << endl;\n";
+  const string i = getIndent(expr);
+  /* const string i = ""; */
+  if (auto p = get_if<Assign>(&expr.contents))
+    return os << i << p->var << "=" << p->op << ";\n";
+
+  if (auto p = get_if<If>(&expr.contents))
+    return os << i << termcolor::dark << "if (" << p->cond << ")" << reset
+              << " {\n" << *p->true_branch << i << "    " << "}\n";
+  if (auto p = get_if<While>(&expr.contents))
+    return os << i << "while (" << p->cond << ") {\n"
+              << *p->body << i << "    " << "\n}\n";
+  if (auto p = get_if<Print>(&expr.contents))
+    return os << i << "cout << " << p->var << " << endl;\n";
+  if (auto p = get_if<Goto>(&expr.contents))
+    return os << i << "if (" << p->cond << ") {"
+              << " " << cyan << "goto " << reset << p->dest << "; }\n";
+  if (get_if<Break>(&expr.contents))
+    return os << i << "break;" << " << endl;\n";
+  return os;
 }
 
 ostream& operator<<(ostream& os, const Stmt& stmt) {
@@ -83,10 +69,10 @@ ostream& operator<<(ostream& os, const Stmt& stmt) {
     "*  Statement   *\n"
     "***************/\n";
 
-  if (!stmt.parent_expr)
+  if (!stmt.par_expr)
     std::cout << head << std::endl;
   for (const auto& e : stmt.s)
-    visit([&os](auto&& expr) -> ostream& { return os << expr; }, e);
+    os << e;
   return os;
 }
 

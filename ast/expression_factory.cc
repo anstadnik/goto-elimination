@@ -1,4 +1,4 @@
-#include "statement.h"
+#include "ast.h"
 
 using namespace std;
 using namespace termcolor;
@@ -12,16 +12,17 @@ struct E {
   string to_print;
   string condition;
 
-  friend ostream& operator<<(ostream& os, const E& e);
+  /* friend ostream& operator<<(ostream& os, const E& e); */
 };
 
-ostream& operator<<(ostream& os, const E& e) {
-  return os << reset << "Label: " << green << e.label << reset
-            << ", statement: " << green << e.assignment.first << "="
-            << e.assignment.second << reset << ", to_print: " << green
-            << e.to_print << reset << ", condition: " << green << e.condition
-            << reset;
-}
+/* ostream& operator<<(ostream& os, const E& e) { */
+/*   return os << reset << "Label: " << green << e.label << reset */
+/*             << ", statement: " << green << e.assignment.first << "=" */
+/*             << e.assignment.second << reset << ", to_print: " << green */
+/*             << e.to_print << reset << ", condition: " << green << e.condition
+ */
+/*             << reset; */
+/* } */
 }  // namespace
 
 void parseToken(const string& s, size_t& beg, size_t& end, E& e) {
@@ -71,11 +72,11 @@ Expr expressionFactory(string s) {
     parseToken(s, beg, end, e);
   }
 
-  if (!e.condition.empty()) return Goto(e.label, e.condition);
-  if (!e.to_print.empty()) return Print(e.label, e.to_print);
+  if (!e.condition.empty()) return Expr(e.label, Goto{"", e.condition});
+  if (!e.to_print.empty()) return Expr(e.label, Print{e.to_print});
   if (!e.assignment.first.empty())
-    return Assign(e.label, e.assignment.first, e.assignment.second);
+    return Expr(e.label, Assign{e.assignment.first, e.assignment.second});
   if (!e.label.empty()) throw runtime_error("Wrong input");
-  return BaseExpr(s);
+  return Expr(s, Empty());
 }
 }  // namespace statement

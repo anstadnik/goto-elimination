@@ -2,6 +2,7 @@
 
 #define BACKWARD_HAS_DW 1
 #include "algs/algs.h"
+#include "ast.h"
 #include "goto_elimination.h"
 #include "statement.h"
 #include "tests.h"
@@ -26,12 +27,13 @@ int main(int argc, char *argv[]) {
   icecream::ic.include_context(true);
 
   /* string fn = ParseArgs(argc, argv); */
+  (void)argc, (void)argv;
   const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL};
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
-  for (const auto &l : s) std::cout << l << std::endl;
+  /* for (const auto &l : s) std::cout << l << std::endl; */
 
-  statement::Stmt::ptr st = statement::statementFactory(s);
+  statement::Stmt::ptr st = statement::StatementFactory::gen_statement(s);
   std::cout << *st << std::endl;
   tests::TestStmt::run_all(*st);
 

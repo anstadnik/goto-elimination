@@ -14,6 +14,9 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   # string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
   string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=undefined")
   string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=undefined")
+	add_compile_options(-Wall -Wextra -pedantic -Werror -fsanitize=undefined)
+	add_link_options(-fsanitize=undefined)
+
 	# string(APPEND CMAKE_CXX_FLAGS_DEBUG " -ftime-trace")
 endif()
 
@@ -25,7 +28,7 @@ set(CMAKE_CXX_STANDARD 20)
 project(app CXX)
 file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   src/*.cc ast/*.cc goto_elimination/*.cc tests/*.cc) 
-include_directories(includes)
+include_directories(ast goto_elimination tests)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} algs) 
