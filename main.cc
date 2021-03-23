@@ -4,8 +4,6 @@
 #include "algs/algs.h"
 #include "ast.h"
 #include "goto_elimination.h"
-#include "statement.h"
-#include "tests.h"
 
 namespace backward {
 backward::SignalHandling sh;
@@ -29,15 +27,15 @@ int main(int argc, char *argv[]) {
   /* string fn = ParseArgs(argc, argv); */
   (void)argc, (void)argv;
   const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL};
+  /* const char *dummy[] = {"app", "inputs/complicated.txt", NULL}; */
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
   /* for (const auto &l : s) std::cout << l << std::endl; */
 
-  statement::Stmt::ptr st = statement::StatementFactory::gen_statement(s);
-  std::cout << *st << std::endl;
-  tests::TestStmt::run_all(*st);
+  ast::Stmt::ptr st = ast::StatementFactory::gen_statement(s);
+  /* std::cout << *st << std::endl; */
 
-  st = eliminateGoto(move(st));
+  st = goto_elimination::eliminateGoto(move(st));
 
   /* for (auto& expr : st) */
   /*   std::cout << expr; */

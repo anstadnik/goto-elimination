@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace statement {
+namespace ast {
 
 Stmt::ptr StatementFactory::parse_tree_to_statement(
     ParseTree& t, const string& first, unordered_set<string>& keys) {
@@ -55,10 +55,10 @@ Stmt::ptr StatementFactory::gen_statement(list<string> s) {
   s.pop_front();
 
   auto [parse_tree, first] = gen_parse_tree(s);
-  /* std::cout << parse_tree << std::endl; */
+  std::cout << parse_tree << std::endl;
   auto stmt = parse_tree_to_statement(parse_tree, first);
   /* std::cout << *stmt << std::endl; */
   return stmt;
 }
 
-}  // namespace statement
+}  // namespace ast

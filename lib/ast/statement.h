@@ -14,10 +14,10 @@
 using namespace std;
 
 namespace tests {
-class TestStmt;
+class Test;
 }
 
-namespace statement {
+namespace ast {
 
 class Expr;
 
@@ -57,6 +57,6 @@ class Stmt {
   Stmt::ptr extract_from(Iterator begin, Iterator end);
 
   friend ostream& operator<<(ostream& os, const Stmt& a);
-  friend class tests::TestStmt;
+  friend class tests::Test;
 };
-}  // namespace statement
+}  // namespace ast

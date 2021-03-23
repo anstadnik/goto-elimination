@@ -1,3 +1,3 @@
-[submodule "algs"]
-	path = algs
+[submodule "lib/algs"]
+	path = lib/algs
 	url = git@gitlab.com:astadnik/algs.git

@@ -3,7 +3,7 @@
 #include "parse_tree.h"
 #include "statement.h"
 
-namespace statement {
+namespace ast {
 Stmt::ptr statementFactory(list<string> s);
 
 class StatementFactory {
@@ -19,4 +19,4 @@ class StatementFactory {
  public:
   static Stmt::ptr gen_statement(list<string> s);
 };
-}  // namespace statement
+}  // namespace ast

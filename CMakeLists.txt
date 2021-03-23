@@ -16,8 +16,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=undefined")
 	add_compile_options(-Wall -Wextra -pedantic -Werror -fsanitize=undefined)
 	add_link_options(-fsanitize=undefined)
-
-	# string(APPEND CMAKE_CXX_FLAGS_DEBUG " -ftime-trace")
 endif()
 
 # Set cmake standard
@@ -25,33 +23,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
 # Define project
-project(app CXX)
-file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-  src/*.cc ast/*.cc goto_elimination/*.cc tests/*.cc) 
-include_directories(ast goto_elimination tests)
+project(goto_elimination LANGUAGES CXX
+    VERSION 1.0.0
+)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} algs) 
+include_directories(lib/ast lib/goto_elimination)
 
-# Add libs
-add_subdirectory(algs libs/algs)
+# Add goto_elimination
+add_subdirectory(lib)
 
-# Use threads
-find_package(Threads)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(app main.cc)
+target_link_libraries(app goto_elimination) 
 
-# Use openmp if found
-option(USE_OPENMP "flag to use OpenMP for multithreading" ON)
-if(USE_OPENMP)
-    find_package(OpenMP 3.0 COMPONENTS CXX)
-    if (OpenMP_CXX_FOUND)
-        message(STATUS "Building with OpenMP Multithreading.")
-    else()
-        message(STATUS "No OpenMP found, no multithreading.")
-    endif()
-endif()
+# Add test
+add_subdirectory(tests)
 
-# Copy to source directory
+###########################
+#  compile_commands.json  #
+###########################
+
 add_custom_target(
     copy-compile-commands ALL
     DEPENDS

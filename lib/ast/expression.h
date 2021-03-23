@@ -2,7 +2,7 @@
 
 #include "statement.h"
 
-namespace statement {
+namespace ast {
 
 struct Empty {
   bool operator==(const Empty&) const = default;
@@ -71,4 +71,4 @@ class Expr {
 };
 ostream& operator<<(ostream& os, const Expr& v);
 Expr expressionFactory(string s);
-}  // namespace statement
+}  // namespace ast

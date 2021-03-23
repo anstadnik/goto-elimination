@@ -1,10 +1,12 @@
 #include "ast.h"
+#include "goto_elimination.h"
+
 
 
 using namespace termcolor;
 
-namespace statement {
-ostream& operator<<(ostream& os, const statement::ParseTree& t) {
+namespace ast {
+ostream& operator<<(ostream& os, const ast::ParseTree& t) {
   /* vector<string> keys(t.size()); */
 
   /* auto key_selector = [](const auto& pair) -> string { return pair.first; }; */
@@ -28,15 +30,7 @@ ostream& operator<<(ostream& os, const statement::ParseTree& t) {
 }
 
 string getIndent(const Expr& e) {
-  if (!e.par_stmt)
-    return "";
-  const Expr* p = e.par_stmt->par_expr;
-  if (!p)
-    return "";
-  size_t indent = 2;
-  while ((p = p->par_stmt->par_expr))
-    indent += 2;
-  return string(indent, ' ');
+  return string(2 * goto_elimination::level(e), ' ');
 }
 
 ostream& operator<<(ostream& os, const Expr& expr) {
@@ -76,4 +70,4 @@ ostream& operator<<(ostream& os, const Stmt& stmt) {
   return os;
 }
 
-}  // namespace statement
+}  // namespace ast

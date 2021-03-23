@@ -4,7 +4,7 @@ using namespace std;
 
 enum class Cond { None, True, False };
 
-namespace statement {
+namespace ast {
 
 void error(const string& expr_label, string message) {
   throw runtime_error(expr_label + ": " + message);
@@ -68,4 +68,4 @@ pair<ParseTree, string> gen_parse_tree(list<string> s) {
   return {move(t), first};
 }
 
-}  // namespace statement
+}  // namespace ast

@@ -2,7 +2,7 @@
 #include "expression.h"
 #include "statement.h"
 
-namespace statement {
+namespace ast {
 class Stmt::Iterator {
  private:
   bool ensure_not_end();
@@ -14,6 +14,7 @@ class Stmt::Iterator {
   using pointer = list<Expr>::iterator;
   using reference = value_type&;
 
+  Iterator() = default;
   Iterator(const pointer& it) : it(it){};
   Iterator(pointer&& it) : it(it){};
   Iterator(const Iterator&) = default;
@@ -61,4 +62,4 @@ Stmt::Iterator Stmt::find_type() {
   });
 }
 
-}  // namespace statement
+}  // namespace ast

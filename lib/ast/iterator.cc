@@ -1,6 +1,6 @@
 #include "ast.h"
 
-namespace statement {
+namespace ast {
 Stmt* getNestedStmt(const Expr& p) {
   if (auto i = get_if<If>(&p.contents))
     return i->true_branch->size() ? i->true_branch.get() : nullptr;
@@ -30,4 +30,4 @@ Stmt::Iterator& Stmt::Iterator::operator++() {
   ++it;
   return *this;
 }
-}  // namespace statement
+}  // namespace ast

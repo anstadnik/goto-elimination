@@ -3,7 +3,7 @@
 using namespace std;
 using namespace termcolor;
 
-namespace statement {
+namespace ast {
 
 namespace {
 struct E {
@@ -79,4 +79,4 @@ Expr expressionFactory(string s) {
   if (!e.label.empty()) throw runtime_error("Wrong input");
   return Expr(s, Empty());
 }
-}  // namespace statement
+}  // namespace ast

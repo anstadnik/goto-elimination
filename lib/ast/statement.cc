@@ -2,13 +2,12 @@
 
 using namespace std;
 
-namespace statement {
+namespace ast {
 
 void fix_parents(Expr& e, Stmt* parent) {
   e.par_stmt = parent;
-  if (holds_alternative<If>(e.contents)) {
+  if (holds_alternative<If>(e.contents)) 
     get<If>(e.contents).true_branch->par_expr = &e;
-  }
   if (holds_alternative<While>(e.contents))
     get<While>(e.contents).body->par_expr = &e;
 }
@@ -31,9 +30,8 @@ void Stmt::insert(const string& parent, Expr expr, bool after) {
 bool Stmt::empty() const { return s.empty(); }
 
 void Stmt::remove(const string& label) {
-  for (auto& e : *this) {
+  for (auto& e : *this)
     if (e.label == label) e.par_stmt->s.remove(e);
-  }
 }
 
 Stmt::ptr Stmt::extract_from(Iterator begin, Iterator end) {
@@ -45,8 +43,6 @@ Stmt::ptr Stmt::extract_from(Iterator begin, Iterator end) {
   extracted_s.splice(extracted_s.begin(), extracted_s, b, e);
   return make_unique<Stmt>(move(extracted_s));
 }
-
-/* Stmt::Stmt(Expr* parent_stmt) : parent_expr(parent_stmt) {} */
 
 Stmt::Stmt(list<Expr>&& s, Expr* parent_stmt)
     : s(move(s)), par_expr(parent_stmt) {
@@ -67,4 +63,4 @@ Stmt::Iterator Stmt::find(const string& label) {
 
 Stmt::Iterator Stmt::begin() { return Iterator(s.begin()); }
 Stmt::Iterator Stmt::end() { return Iterator(s.end()); }
-}  // namespace statement
+}  // namespace ast
