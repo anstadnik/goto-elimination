@@ -36,9 +36,7 @@ int main(int argc, char *argv[]) {
   /* std::cout << *st << std::endl; */
 
   st = goto_elimination::eliminateGoto(move(st));
-
-  /* for (auto& expr : st) */
-  /*   std::cout << expr; */
+  std::cout << *st << std::endl;
 
   return 0;
 }

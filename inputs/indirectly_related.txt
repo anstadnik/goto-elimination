@@ -5,3 +5,14 @@ graph LR
     Q -->|False| O{1}
     O -->|True| R
     O -->|False| M
+
+%% B:  if (1) {
+%% Q:    if (0) {
+%% J:      cout << "HELLO" << endl;
+%%       }
+%% O:    if (1) {
+%% R:      cout << "WORLD" << endl;
+%%       }
+%% M:      }
+%% _B: if (true) { goto R; }
+

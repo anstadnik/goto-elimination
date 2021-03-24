@@ -5,11 +5,18 @@ using namespace std;
 
 namespace goto_elimination
 {
+  Stmt& get_top_parent(const Expr& e) {
+    if (e.par_stmt->par_expr)
+      return get_top_parent(*e.par_stmt->par_expr);
+    return *e.par_stmt;
+  }
+
   Stmt::Iterator move_outward(Stmt::Iterator it) {
     assert(holds_alternative<Goto>(it->contents));
   
     const Goto& e = get<Goto>(it->contents);
     Stmt& parent = *it->par_stmt;
+    /* Stmt& parent = get_top_parent(*it); */
     assert(parent.par_expr);
     if (holds_alternative<If>(parent.par_expr->contents)) {
       string bool_name = "_cond_" + it->label;
@@ -17,7 +24,7 @@ namespace goto_elimination
       parent.insert(it->label, Expr(bool_name, Assign{bool_name, e.cond}));
       // Put everything after the goto in If
       parent.insert(it->label, Expr("_if_" + it->label,
-                                    If{parent.extract_from(it, parent.end()),
+                                    If{parent.extract_from(it->label),
                                        "!" + bool_name}));
       parent.remove(it->label);
       // Insert goto outside it's previous parent

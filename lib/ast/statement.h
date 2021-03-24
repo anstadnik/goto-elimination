@@ -40,7 +40,7 @@ class Stmt {
 
   ~Stmt() = default;
 
-  void insert(const string& parent, Expr expr, bool after = false);
+  Iterator insert(const string& parent, Expr&& expr, bool after = false);
   void push_back(Expr&& expr);
   void remove(const string& label);
   void replace(string pattern, Expr& replacement);
@@ -54,9 +54,10 @@ class Stmt {
   bool empty() const;
 
   /* Iterator move_outward(const Iterator& it); */
-  Stmt::ptr extract_from(Iterator begin, Iterator end);
+  Stmt::ptr extract_from(const string& begin, const string& end = "");
 
   friend ostream& operator<<(ostream& os, const Stmt& a);
   friend class tests::Test;
+  friend Stmt* getNestedStmt(const Expr& p);
 };
 }  // namespace ast

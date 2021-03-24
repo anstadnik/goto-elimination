@@ -17,7 +17,7 @@ Stmt::ptr StatementFactory::parse_tree_to_statement(
       string dest = p->dest, cond = p->cond;
       if (keys.count(dest) && keys.count(next)) {
         stmt->push_back(Expr(cur_label, Goto{cond, dest}));
-        stmt->push_back(Expr("_" + cur_label, Goto{"true", next}));
+        stmt->push_back(Expr("_" + cur_label, Goto{next, "true"}));
         break;
       }
       if (keys.count(dest))
@@ -55,7 +55,7 @@ Stmt::ptr StatementFactory::gen_statement(list<string> s) {
   s.pop_front();
 
   auto [parse_tree, first] = gen_parse_tree(s);
-  std::cout << parse_tree << std::endl;
+  /* std::cout << parse_tree << std::endl; */
   auto stmt = parse_tree_to_statement(parse_tree, first);
   /* std::cout << *stmt << std::endl; */
   return stmt;

@@ -8,7 +8,11 @@ graph LR
     F --> O{b>=1000}
     O -->|True| Q{b>100}
     Q -->|True| J("HELLO")
-    Q -->|False| K("WORLD")
+    Q -->|False| M{b>100}
+    M -->|True| K("WORLD")
+    M -->|False| P{b>100}
+    P -->|True| D
+    P -->|False| Q
     O -->|False| G{a%5==0}
     G -->|False| B
     G -->|True| H{a < 500}

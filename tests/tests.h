@@ -19,7 +19,9 @@ class StmtTest : public ::testing::Test {
     o = s->find("O");
     q = s->find("Q");
     j = s->find("J");
+    m = s->find("M");
     k = s->find("K");
+    p = s->find("P");
     h = s->find("H");
   }
 
@@ -31,7 +33,9 @@ class StmtTest : public ::testing::Test {
   ast::Stmt::Iterator o;
   ast::Stmt::Iterator q;
   ast::Stmt::Iterator j;
+  ast::Stmt::Iterator m;
   ast::Stmt::Iterator k;
+  ast::Stmt::Iterator p;
   ast::Stmt::Iterator h;
 };
 }  // namespace tests

@@ -28,13 +28,13 @@ bool siblings(const Stmt::Iterator& g, const Stmt::Iterator& l) {
 }
 
 bool directly_related(const Stmt::Iterator& g, const Stmt::Iterator& l) {
-  for (auto parent = g->par_stmt; parent->par_expr;
-       parent = parent->par_expr->par_stmt)
-    if (l->par_stmt == parent) return true;
-  for (auto parent = l->par_stmt; parent->par_expr;
-       parent = parent->par_expr->par_stmt)
-    if (l->par_stmt == parent) return true;
-  return true;
+  for (auto parent = g->par_stmt->par_expr; parent;
+       parent = parent->par_stmt->par_expr)
+    if (l->par_stmt == parent->par_stmt) return true;
+  for (auto parent = l->par_stmt->par_expr; parent;
+       parent = parent->par_stmt->par_expr)
+    if (g->par_stmt == parent->par_stmt) return true;
+  return false;
 }
 
 bool indirectly_related(const Stmt::Iterator& g, const Stmt::Iterator& l) {
