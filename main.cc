@@ -5,9 +5,9 @@
 #include "ast.h"
 #include "goto_elimination.h"
 
-namespace backward {
-backward::SignalHandling sh;
-}  // namespace backward
+/* namespace backward { */
+/* backward::SignalHandling sh; */
+/* }  // namespace backward */
 
 using namespace std;
 
@@ -26,16 +26,18 @@ int main(int argc, char *argv[]) {
 
   /* string fn = ParseArgs(argc, argv); */
   (void)argc, (void)argv;
-  const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL};
-  /* const char *dummy[] = {"app", "inputs/complicated.txt", NULL}; */
+  /* const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL}; */
+  const char *dummy[] = {"app", "inputs/complicated.txt", NULL};
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
   /* for (const auto &l : s) std::cout << l << std::endl; */
 
   ast::Stmt::ptr st = ast::StatementFactory::gen_statement(s);
-  /* std::cout << *st << std::endl; */
+  std::cout << *st << std::endl;
 
-  st = goto_elimination::eliminateGoto(move(st));
+  /* st = goto_elimination::eliminateGoto(move(st)); */
+
+  goto_elimination::move_outward(st->find("P"));
   std::cout << *st << std::endl;
 
   return 0;

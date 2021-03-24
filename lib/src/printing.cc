@@ -34,7 +34,7 @@ string getIndent(const Expr& e) {
 }
 
 ostream& operator<<(ostream& os, const Expr& expr) {
-  os << green << setw(4) << left << expr.label + ":" << reset;
+  os << green << setw(10) << left << expr.label + ":" << reset;
 
   const string i = getIndent(expr);
   /* const string i = ""; */
@@ -42,16 +42,16 @@ ostream& operator<<(ostream& os, const Expr& expr) {
     return os << i << p->var << "=" << p->op << ";\n";
 
   if (auto p = get_if<If>(&expr.contents))
-    return os << i << termcolor::dark << "if (" << p->cond << ")" << reset
-              << " {\n" << *p->true_branch << i << "    " << "}\n";
+    return os << i << magenta << "if (" << p->cond << ")" << reset
+              << " {\n" << *p->true_branch << i << string(10, ' ') << "}\n";
   if (auto p = get_if<While>(&expr.contents))
     return os << i << "while (" << p->cond << ") {\n"
               << *p->body << i << "    " << "\n}\n";
   if (auto p = get_if<Print>(&expr.contents))
     return os << i << "cout << " << p->var << " << endl;\n";
   if (auto p = get_if<Goto>(&expr.contents))
-    return os << i << "if (" << p->cond << ") {"
-              << " " << cyan << "goto " << reset << p->dest << "; }\n";
+    return os << i << cyan << "if (" << p->cond << ") {"
+              << " " << "goto " << p->dest << "; }" << reset << "\n";
   if (get_if<Break>(&expr.contents))
     return os << i << "break;" << " << endl;\n";
   return os;

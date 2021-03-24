@@ -5,7 +5,8 @@
 namespace ast {
 class Stmt::Iterator {
  private:
-  bool ensure_not_end();
+  bool ensureNotEnd();
+  bool goDeeper();
 
  public:
   using iterator_category = std::forward_iterator_tag;
@@ -15,20 +16,12 @@ class Stmt::Iterator {
   using reference = value_type&;
 
   Iterator() = default;
-  Iterator(const pointer& it) : it(it){};
-  Iterator(pointer&& it) : it(it){};
+  Iterator(const pointer& it, Stmt* top_stmt) : it(it), top_stmt(top_stmt) {};
+  Iterator(pointer&& it, Stmt* top_stmt) : it(it), top_stmt(top_stmt) {};
   Iterator(const Iterator&) = default;
   Iterator(Iterator&&) = default;
   Iterator& operator=(const Iterator&) = default;
   Iterator& operator=(Iterator&&) = default;
-  Iterator& operator=(const pointer& it) {
-    this->it = it;
-    return *this;
-  };
-  Iterator& operator=(pointer&& it) {
-    this->it = it;
-    return *this;
-  }
 
   reference operator*() const { return *it; }
   pointer operator->() { return it; }
@@ -44,17 +37,14 @@ class Stmt::Iterator {
     return tmp;
   }
 
-  friend bool operator==(const Iterator& a, const Iterator& b) {
-    return a.it == b.it;
-  };
-  friend bool operator!=(const Iterator& a, const Iterator& b) {
-    return a.it != b.it;
-  };
+  friend bool operator==(const Iterator& a, const Iterator& b) = default;
+  friend bool operator!=(const Iterator& a, const Iterator& b) = default;
 
  private:
   pointer it;
-  stack<pointer> history;
+  Stmt* top_stmt;
 };
+
 template <class T>
 Stmt::Iterator Stmt::find_type() {
   return std::find_if(this->begin(), this->end(), [](const Expr& expr) {

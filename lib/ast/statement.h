@@ -4,7 +4,6 @@
 #include <cassert>
 #include <list>
 #include <memory>
-#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>

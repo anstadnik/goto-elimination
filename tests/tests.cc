@@ -65,18 +65,12 @@ TEST_F(StmtTest, testExtract) {
   ASSERT_NE(extracted->find("P"), extracted->end());
   ASSERT_EQ(offset(*s->find("H")), 10);
 }
-/* TEST_F(StmtTest, testMoveOutward) { */
-/*   size_t old_level = level(*p), old_offset = offset(*p); */
-/*   /1* std::cout << *s << std::endl; *1/ */
-/*   /1* for (auto& e : *s) { *1/ */
-/*   /1*   std::cout << e.label << std::endl; *1/ */
-/*   /1* } *1/ */
-/*   /1* std::cout << *s->find("P") << std::endl; *1/ */
-/*   /1* std::cout << (s->find("P") == p) << std::endl; *1/ */
-/*   move_outward(p); */
-/*   ASSERT_LT(level(*p), old_level); */
-/*   ASSERT_LT(offset(*p), old_offset); */
-/* } */
+TEST_F(StmtTest, testMoveOutward) {
+  size_t old_level = level(*p), old_offset = offset(*p);
+  move_outward(p);
+  ASSERT_LT(level(*p), old_level);
+  ASSERT_GT(offset(*p), old_offset);
+}
 TEST_F(StmtTest, testMoveInward) {
 }
 

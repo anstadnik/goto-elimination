@@ -1,3 +1,4 @@
+#include <memory>
 #include "ast.h"
 
 using namespace std;
@@ -29,26 +30,31 @@ Stmt::Iterator Stmt::insert(const string& parent, Expr&& expr, bool after) {
   assert(s_i != s_parent->s.end());
   auto p = s_parent->s.insert(after ? ++s_i : s_i, move(expr));
   fix_parents(*p, s_parent);
-  return p;
+  return {p, this};
 }
 
 bool Stmt::empty() const { return s.empty(); }
 
 void Stmt::remove(const string& label) {
   for (auto& e : *this)
-    if (e.label == label) e.par_stmt->s.remove(e);
+    if (e.label == label) {
+      e.par_stmt->s.remove(e);
+      break;
+    }
 }
 
 Stmt::ptr Stmt::extract_from(const string& begin, const string& end) {
-  list<Expr> extracted_s;
+  Stmt::ptr extracted_s = make_unique<Stmt>();
   auto& s = this->find(begin)->par_stmt->s;
   auto b = ::find(s.begin(), s.end(), *this->find(begin)),
        e = end.empty() ? s.end() : ::find(s.begin(), s.end(), *this->find(end));
   assert(b != s.end() && (e != s.end() || end.empty()));
 
-  extracted_s.splice(extracted_s.begin(), s, b, e);
+  extracted_s->s.splice(extracted_s->s.begin(), s, b, e);
+  for (auto& e : extracted_s->s) 
+    fix_parents(e, extracted_s.get());
 
-  return make_unique<Stmt>(move(extracted_s));
+  return extracted_s;
 }
 
 Stmt::Stmt(list<Expr>&& s, Expr* parent_stmt)
@@ -72,6 +78,6 @@ Stmt::Iterator Stmt::find(const string& label) {
   return rez;
 }
 
-Stmt::Iterator Stmt::begin() { return Iterator(s.begin()); }
-Stmt::Iterator Stmt::end() { return Iterator(s.end()); }
+Stmt::Iterator Stmt::begin() { return Iterator(s.begin(), this); }
+Stmt::Iterator Stmt::end() { return Iterator(s.end(), this); }
 }  // namespace ast

@@ -1,32 +1,34 @@
 #include "ast.h"
 
 namespace ast {
-Stmt* getNestedStmt(const Expr& p) {
-  if (auto i = get_if<If>(&p.contents))
-    return i->true_branch->size() ? i->true_branch.get() : nullptr;
-  else if (auto i = get_if<While>(&p.contents))
-    return i->body->size() ? i->body.get() : nullptr;
-  return nullptr;
+
+bool Stmt::Iterator::goDeeper() {
+  if (auto i = get_if<If>(&it->contents); i && i->true_branch->size() )
+    it = i->true_branch.get()->begin().it;
+  else if (auto i = get_if<While>(&it->contents); i && i->body->size())
+    it = i->body.get()->begin().it;
+  else
+    return false;
+  return true;
 }
 
-bool Stmt::Iterator::ensure_not_end() {
+bool Stmt::Iterator::ensureNotEnd() {
   // If reached the end of the current statement, try to go to upper level
-  if (!history.empty() && ++pointer(it) == it->par_stmt->end()) {
-    it = history.top();
-    history.pop();
-    return ensure_not_end();
+  if (Expr* par_expr = it->par_stmt->par_expr;
+      it->par_stmt != top_stmt && ++pointer(it) == it->par_stmt->end().it &&
+      par_expr) {
+    it = par_expr->par_stmt->find(par_expr->label).it;
+    return ensureNotEnd();
   }
-
   return true;
 }
 
 Stmt::Iterator& Stmt::Iterator::operator++() {
-  if (auto i = getNestedStmt(*it)) {
-    history.push(it);
-    it = i->begin().it;
-    return *this;
-  }
-  ensure_not_end();
+  /* If current iterator points at if or while, which has body, go deeper. */
+  if (goDeeper()) return *this;
+  /* If we reached the end of current statement, try to go upper (to the parent
+   * if or while statement */
+  ensureNotEnd();
   ++it;
   return *this;
 }

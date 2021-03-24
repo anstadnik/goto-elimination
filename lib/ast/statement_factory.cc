@@ -16,14 +16,14 @@ Stmt::ptr StatementFactory::parse_tree_to_statement(
     if (auto p = get_if<Goto>(&expr.contents)) {
       string dest = p->dest, cond = p->cond;
       if (keys.count(dest) && keys.count(next)) {
-        stmt->push_back(Expr(cur_label, Goto{cond, dest}));
+        stmt->push_back(Expr(cur_label, Goto{dest, cond}));
         stmt->push_back(Expr("_" + cur_label, Goto{next, "true"}));
         break;
       }
       if (keys.count(dest))
-        stmt->push_back(Expr(cur_label, Goto{cond, dest}));
+        stmt->push_back(Expr(cur_label, Goto{dest, cond}));
       else if (keys.count(next)) {
-        stmt->push_back(Expr(cur_label, Goto{"!" + cond, next}));
+        stmt->push_back(Expr(cur_label, Goto{next, "!" + cond}));
         next = dest;
       } else {
         auto nested_stmt = parse_tree_to_statement(t, dest, keys);
