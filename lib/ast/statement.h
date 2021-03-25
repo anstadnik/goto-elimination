@@ -39,11 +39,12 @@ class Stmt {
 
   ~Stmt() = default;
 
-  Iterator insert(const string& parent, Expr&& expr, bool after = false);
+  Iterator insert(const Iterator& parent, Expr&& expr);
   void push_back(Expr&& expr);
   void remove(const string& label);
   void replace(string pattern, Expr& replacement);
   Iterator find(const string& label);
+  Iterator find_direct_child(const Expr& e);
   template <class T>
   Iterator find_type();
 

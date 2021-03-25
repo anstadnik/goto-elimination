@@ -45,7 +45,7 @@ bool indirectly_related(const ast::Stmt::Iterator& g,
  *********************/
 
 ast::Stmt::Iterator move_outward(ast::Stmt::Iterator it);
-ast::Stmt::Iterator move_inward(ast::Stmt::Iterator it);
+ast::Stmt::Iterator move_inward(ast::Stmt::Iterator it, ast::Stmt::Iterator parent);
 ast::Stmt::Iterator lift(ast::Stmt::Iterator it, size_t offset);
 
 /*************

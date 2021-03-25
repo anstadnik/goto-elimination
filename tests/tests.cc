@@ -51,9 +51,13 @@ TEST_F(StmtTest, testIndirectlyRelated) {
   ASSERT_FALSE(indirectly_related(j, a));
   ASSERT_TRUE(indirectly_related(j, k));
 }
+TEST_F(StmtTest, testRemove) {
+  s->remove("P");
+  ASSERT_EQ(s->find("P"), s->end());
+}
 TEST_F(StmtTest, testInsert) {
   size_t old_level = level(*p), old_offset = offset(*p);
-  s->insert("P", Expr("Potato", If{make_unique<Stmt>(), "cond"}));
+  p->par_stmt->insert(p, Expr("Potato", If{make_unique<Stmt>(), "cond"}));
   ASSERT_EQ(old_level, level(*s->find("P")));
   ASSERT_EQ(old_offset+1, offset(*s->find("P")));
   ASSERT_NE(s->find("P"), s->end());
@@ -67,11 +71,15 @@ TEST_F(StmtTest, testExtract) {
 }
 TEST_F(StmtTest, testMoveOutward) {
   size_t old_level = level(*p), old_offset = offset(*p);
-  move_outward(p);
+  p = move_outward(p);
   ASSERT_LT(level(*p), old_level);
   ASSERT_GT(offset(*p), old_offset);
 }
 TEST_F(StmtTest, testMoveInward) {
+  size_t old_level = level(*e), old_offset = offset(*e);
+  move_inward(e, o);
+  ASSERT_GT(level(*p), old_level);
+  ASSERT_GT(offset(*p), old_offset);
 }
 
 }  // namespace tests

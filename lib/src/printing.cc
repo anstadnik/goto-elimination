@@ -34,7 +34,7 @@ string getIndent(const Expr& e) {
 }
 
 ostream& operator<<(ostream& os, const Expr& expr) {
-  os << green << setw(10) << left << expr.label + ":" << reset;
+  os << green << setw(15) << left << expr.label + ":" << reset;
 
   const string i = getIndent(expr);
   /* const string i = ""; */
@@ -43,7 +43,7 @@ ostream& operator<<(ostream& os, const Expr& expr) {
 
   if (auto p = get_if<If>(&expr.contents))
     return os << i << magenta << "if (" << p->cond << ")" << reset
-              << " {\n" << *p->true_branch << i << string(10, ' ') << "}\n";
+              << " {\n" << *p->true_branch << i << string(15, ' ') << "}\n";
   if (auto p = get_if<While>(&expr.contents))
     return os << i << "while (" << p->cond << ") {\n"
               << *p->body << i << "    " << "\n}\n";

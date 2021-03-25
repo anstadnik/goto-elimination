@@ -10,11 +10,14 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
 	# set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-  # string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
-  # string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
-  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=undefined")
-  string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=undefined")
-	add_compile_options(-Wall -Wextra -pedantic -Werror -fsanitize=undefined)
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
+  string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fno-omit-frame-pointer -fsanitize=address")
+
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Wall -Wextra -pedantic -Werror")
+
+  # string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=undefined")
+  # string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=undefined")
+	# add_compile_options(-Wall -Wextra -pedantic -Werror -fsanitize=address)
 	add_link_options(-fsanitize=undefined)
 endif()
 

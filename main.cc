@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
   /* st = goto_elimination::eliminateGoto(move(st)); */
 
   goto_elimination::move_outward(st->find("P"));
+  /* goto_elimination::move_inward(st->find("E"), st->find("O")); */
   std::cout << *st << std::endl;
 
   return 0;

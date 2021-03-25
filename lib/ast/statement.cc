@@ -18,18 +18,13 @@ void Stmt::push_back(Expr&& expr) {
   fix_parents(s.back(), this);
 }
 
-Stmt::Iterator Stmt::insert(const string& parent, Expr&& expr, bool after) {
+Stmt::Iterator Stmt::insert(const Iterator& parent, Expr&& expr) {
   assert(find(expr.label) == end());
-  if (this->par_expr) 
-    return this->par_expr->par_stmt->insert(parent, move(expr), after);
   
-  Iterator i = find(parent);
-  if (i == this->end()) throw runtime_error("Parent statement not found");
-  auto s_parent = i->par_stmt;
-  auto s_i = ::find(s_parent->s.begin(), s_parent->s.end(), *i);
-  assert(s_i != s_parent->s.end());
-  auto p = s_parent->s.insert(after ? ++s_i : s_i, move(expr));
-  fix_parents(*p, s_parent);
+  auto s_i = ::find(this->s.begin(), this->s.end(), *parent);
+  assert(s_i != this->s.end());
+  auto p = this->s.insert(s_i, move(expr));
+  fix_parents(*p, this);
   return {p, this};
 }
 
@@ -68,14 +63,12 @@ Stmt::Stmt(Expr&& e, Expr* parent_expr) : par_expr(parent_expr) {
 }
 
 Stmt::Iterator Stmt::find(const string& label) {
-  /* auto rez = std::find_if(this->begin(), this->end(), */
-  /*                     [&label](const Expr& e) { return e.label == label; }); */
+  return std::find_if(this->begin(), this->end(),
+                      [&label](const Expr& e) { return e.label == label; });
+}
 
-  Iterator rez;
-  for (rez = this->begin(); rez != this->end(); rez++) {
-    if (rez->label == label) break;
-  }
-  return rez;
+Stmt::Iterator Stmt::find_direct_child(const Expr& e) {
+  return {std::find(this->s.begin(), this->s.end(), e), this};
 }
 
 Stmt::Iterator Stmt::begin() { return Iterator(s.begin(), this); }

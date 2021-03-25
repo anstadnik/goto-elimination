@@ -52,7 +52,12 @@ namespace goto_elimination
             lift(g, offset(*l));
           /* move g in to level(l) using inward-movement transf. */
           while (level(*g) < level(*l)) {
-            g = move_inward(g);
+            // Where we want to move the goto
+            auto target = l;
+            while (level(*g) != level(*target)-1)
+              target = target->par_stmt->par_expr->par_stmt->find_direct_child(
+                  *target->par_stmt->par_expr);
+            g = move_inward(g, target);
             cout << *stmt << endl;
             cin.get();
           }
