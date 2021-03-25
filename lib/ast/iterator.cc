@@ -3,8 +3,8 @@
 namespace ast {
 
 bool Stmt::Iterator::goDeeper() {
-  if (auto i = get_if<If>(&it->contents); i && i->true_branch->size() )
-    it = i->true_branch.get()->begin().it;
+  if (auto i = get_if<If>(&it->contents); i && i->branch->size() )
+    it = i->branch.get()->begin().it;
   else if (auto i = get_if<While>(&it->contents); i && i->body->size())
     it = i->body.get()->begin().it;
   else

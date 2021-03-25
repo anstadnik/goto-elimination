@@ -54,7 +54,8 @@ class Stmt {
   bool empty() const;
 
   /* Iterator move_outward(const Iterator& it); */
-  Stmt::ptr extract_from(const string& begin, const string& end = "");
+  Stmt::ptr extract_from(const Iterator& begin);
+  Stmt::ptr extract(const Iterator& begin, const Iterator& end);
 
   friend ostream& operator<<(ostream& os, const Stmt& a);
   friend class tests::Test;

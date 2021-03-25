@@ -64,7 +64,7 @@ TEST_F(StmtTest, testInsert) {
   ASSERT_NE(s->find("Potato"), s->end());
 }
 TEST_F(StmtTest, testExtract) {
-  Stmt::ptr extracted = s->extract_from("M");
+  Stmt::ptr extracted = m->par_stmt->extract_from(m);
   ASSERT_EQ(s->find("P"), s->end());
   ASSERT_NE(extracted->find("P"), extracted->end());
   ASSERT_EQ(offset(*s->find("H")), 10);

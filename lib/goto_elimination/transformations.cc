@@ -17,14 +17,14 @@ namespace goto_elimination
     const Goto e = get<Goto>(it->contents);
     const string label = it->label;
 
-    const string suffix = to_string(level(*it)) + "_out_" + label;
-    const string bool_name = "_cond_" + suffix;
+    const string suffix =  "_out_" + label + to_string(level(*it));
+    const string bool_name =  suffix + "_cond_";
 
     // Insert condition
     par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
     // Put everything after the goto in If
-    Stmt::ptr extracted = par_s.extract_from(next(it)->label);
-    par_s.insert(it, Expr("_if_" + suffix, If{move(extracted), "!" + bool_name}));
+    Stmt::ptr branch = par_s.extract_from(next(it));
+    par_s.insert(it, Expr( suffix+ "_if_" , If{move(branch), "!" + bool_name}));
     par_s.remove(label);
     // Insert goto after it's previous parent
     Stmt::Iterator par_e =
@@ -62,24 +62,25 @@ namespace goto_elimination
     const string label = it->label;
 
     if (holds_alternative<If>(target->contents)) {
-      const string suffix = to_string(level(*it)) + "_in_";
-      string bool_name = "_cond_" + suffix + label;
+      const string suffix = "_in_" + to_string(level(*it));
+      string bool_name =  suffix +"_cond_" + label;
       // Insert condition
       par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
       // Put everything between the goto and target in If
-      auto&& extracted = par_s.extract_from(next(it)->label, target->label);
-      par_s.insert(it, Expr("_if_" + suffix + label,
-                            If{move(extracted), "!" + bool_name}));
+      auto&& branch = par_s.extract(next(it), target);
+      if (branch->size())
+        par_s.insert(it, Expr( suffix +"_if_" + label,
+                              If{move(branch), "!" + bool_name}));
       par_s.remove(label);
       // Change the condition
       get<If>(par_s.find_direct_child(*target)->contents).cond += " || " + bool_name;
       // Insert goto after it's previous parent
       auto& target_s = get<If>(target->contents);
-      if (target_s.true_branch->size())
-        it = target_s.true_branch->insert(target_s.true_branch->begin(),
+      if (target_s.branch->size())
+        it = target_s.branch->insert(target_s.branch->begin(),
             Expr(label, Goto{e.dest, bool_name}));
       else
-        it = target_s.true_branch->insert(target_s.true_branch->end(),
+        it = target_s.branch->insert(target_s.branch->end(),
             Expr(label, Goto{e.dest, bool_name}));
 
     } else if (holds_alternative<While>(it->contents)) {
@@ -92,9 +93,43 @@ namespace goto_elimination
     return it;
   }
 
-  Stmt::Iterator lift(Stmt::Iterator it, size_t offset) {
-    (void)it;
-    (void)offset;
+  Stmt::Iterator lift(Stmt::Iterator it, Stmt::Iterator target) {
+    assert(level(*it) == level(*target));
+    assert(offset(*it) > offset(*target));
+
+    // Not a reference, cause we will detele it
+    const Goto e = get<Goto>(it->contents);
+    const string label = it->label;
+
+    const string suffix = "_lift_" + label + to_string(level(*it));
+
+    Stmt& par_s = *it->par_stmt;
+
+    // Insert conditionals
+    par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
+       Expr(suffix + "_goto_", Assign{suffix + "_goto_", "0"}));
+    par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
+       Expr(suffix + "_f_t_", Assign{suffix + "_goto_", "1"}));
+
+    // Save as a reference to the it position
+    const auto& next_e = next(it);
+
+    // Put everything between the target and it in If
+    auto&& body = par_s.extract(target, it);
+
+    // Change flags
+    body->insert(body->begin(), Expr(suffix + "_f_f_", Assign{suffix + "_f_", "0"}));
+    body->insert(body->end(), Expr(suffix + "_goto_", Assign{suffix + "_goto_", e.cond}));
+
+    // Go in loop for the first time or if the goto cond is true
+    const string while_cond = suffix + "_goto_" + " || " + suffix + "_f_";
+
+    it = body->insert(body->find(target->label), Expr(label, e));
+
+    par_s.insert(next_e,
+                 Expr(suffix + "_if_", While{move(body), while_cond}));
+    par_s.remove(label);
+
     return it;
   }
   

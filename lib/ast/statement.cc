@@ -8,7 +8,7 @@ namespace ast {
 void fix_parents(Expr& e, Stmt* parent) {
   if (parent) e.par_stmt = parent;
   if (holds_alternative<If>(e.contents))
-    get<If>(e.contents).true_branch->par_expr = &e;
+    get<If>(e.contents).branch->par_expr = &e;
   if (holds_alternative<While>(e.contents))
     get<While>(e.contents).body->par_expr = &e;
 }
@@ -19,10 +19,9 @@ void Stmt::push_back(Expr&& expr) {
 }
 
 Stmt::Iterator Stmt::insert(const Iterator& parent, Expr&& expr) {
-  assert(find(expr.label) == end());
+  assert(parent == end() || parent->par_stmt == this);
   
-  auto s_i = ::find(this->s.begin(), this->s.end(), *parent);
-  assert(s_i != this->s.end());
+  auto s_i = parent.get_it();
   auto p = this->s.insert(s_i, move(expr));
   fix_parents(*p, this);
   return {p, this};
@@ -38,12 +37,16 @@ void Stmt::remove(const string& label) {
     }
 }
 
-Stmt::ptr Stmt::extract_from(const string& begin, const string& end) {
+Stmt::ptr Stmt::extract_from(const Stmt::Iterator& begin) {
+  return extract(begin, end());
+}
+
+Stmt::ptr Stmt::extract(const Iterator& begin, const Iterator& end) {
   Stmt::ptr extracted_s = make_unique<Stmt>();
-  auto& s = this->find(begin)->par_stmt->s;
-  auto b = ::find(s.begin(), s.end(), *this->find(begin)),
-       e = end.empty() ? s.end() : ::find(s.begin(), s.end(), *this->find(end));
-  assert(b != s.end() && (e != s.end() || end.empty()));
+  assert(begin->par_stmt == this && (end == this->end() || end->par_stmt == this));
+
+  auto b = begin.get_it(), e = end.get_it();
+  assert(b != s.end() and distance(s.begin(), b) <= distance(s.begin(), e));
 
   extracted_s->s.splice(extracted_s->s.begin(), s, b, e);
   for (auto& e : extracted_s->s) 

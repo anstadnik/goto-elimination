@@ -15,7 +15,7 @@ struct Assign {
 };
 
 struct If {
-  Stmt::ptr true_branch;
+  Stmt::ptr branch;
   string cond;
   bool operator==(const If&) const = default;
 };

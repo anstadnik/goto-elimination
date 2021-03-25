@@ -26,6 +26,8 @@ class Stmt::Iterator {
   reference operator*() const { return *it; }
   pointer operator->() { return it; }
   const pointer operator->() const { return it; }
+  pointer& get_it() { return it; }
+  const pointer& get_it() const { return it; }
 
   // Prefix increment
   Iterator& operator++();
