@@ -37,6 +37,32 @@ namespace goto_elimination
     return it;
   }
 
+  Stmt::Iterator _move_outward_while(Stmt::Iterator it, Stmt& par_s) {
+    // Not a reference, cause we will detele it
+    const Goto e = get<Goto>(it->contents);
+    const string label = it->label;
+
+    const string suffix =  "_out_" + label + to_string(level(*it));
+    const string bool_name =  suffix + "_cond_";
+
+    // Insert condition
+    par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
+    par_s.insert(it, Expr(suffix+ "_if_" , Break{e.cond}));
+
+    par_s.remove(label);
+
+    // Insert goto after it's previous parent
+    Stmt::Iterator par_e =
+        par_s.par_expr->par_stmt->find(par_s.par_expr->label);
+    Stmt::Iterator next_e = next(par_e);
+    while (level(*next_e) != level(*par_e)) ++next_e;
+
+    it = par_e->par_stmt->insert(next_e, Expr(label, Goto{e.dest, bool_name}));
+
+    return it;
+  }
+
+
   Stmt::Iterator move_outward(Stmt::Iterator it) {
     assert(holds_alternative<Goto>(it->contents));
     Stmt& par_s = *it->par_stmt;
@@ -45,7 +71,7 @@ namespace goto_elimination
     if (holds_alternative<If>(par_s.par_expr->contents))
       return _move_outward_if(it, par_s);
     else if (holds_alternative<While>(it->contents))
-      throw runtime_error("Not implemented");
+      return _move_outward_while(it, par_s);
     else
       /* Here could be logic for switch */
       throw runtime_error("I don't know this type of expression");
@@ -130,6 +156,31 @@ namespace goto_elimination
                  Expr(suffix + "_if_", While{move(body), while_cond}));
     par_s.remove(label);
 
+    return it;
+  }
+
+  Stmt::Iterator eliminate(Stmt::Iterator it) {
+    assert(holds_alternative<Goto>(it->contents));
+
+    const Goto& g = get<Goto>(it->contents);
+    Stmt& par_s = *it->par_stmt;
+    const Stmt::Iterator& target = par_s.find(g.dest);
+    assert(level(*it) == level(*target));
+    const string label =  it->label;
+
+    if (offset(*it) < offset(*par_s.find(g.dest))) {
+      // Remove everything until the target
+      Stmt::ptr branch = par_s.extract(next(it), target);
+      if (branch->size())
+        it = par_s.insert(it, Expr("_elim_" +label, If{move(branch), "!" + g.cond}));
+      par_s.remove(label);
+    } else {
+      // Remove everything between the target and the goto
+      Stmt::ptr branch = par_s.extract(target, it);
+      if (branch->size())
+        it = par_s.insert(it, Expr("_elim_" +label, While{move(branch), g.cond}));
+      par_s.remove(label);
+    }
     return it;
   }
   

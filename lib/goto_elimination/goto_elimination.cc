@@ -66,16 +66,19 @@ Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
       }
 
       /* g and l are guaranteed to be siblings, eliminate g */
-      /* if offset(g) < offset(l) */
+      /* if (offset(g) < offset(l)) { */
       /* then eliminate g with a conditional */
       /* else */
       /* eliminate g with a do-loop */
+      std::cout << "Eliminating " << g->label << std::endl;
+      eliminate(g);
+      cout << *stmt << endl;
       /* } */
-      /* eliminate labels */
-      /* for each label Li in label_list */
-      /* do */
-      /* eliminate Li */
     }
+    /* eliminate labels */
+    /* for each label Li in label_list */
+    /* do */
+    /* eliminate Li */
   }
 
   return stmt;

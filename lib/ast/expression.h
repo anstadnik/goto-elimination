@@ -38,6 +38,7 @@ struct Goto {
 };
 
 struct Break {
+  string cond;
   bool operator==(const Break&) const = default;
 };
 

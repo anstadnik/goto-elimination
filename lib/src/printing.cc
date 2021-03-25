@@ -52,8 +52,8 @@ ostream& operator<<(ostream& os, const Expr& expr) {
   if (auto p = get_if<Goto>(&expr.contents))
     return os << i << cyan << "if (" << p->cond << ") {"
               << " " << "goto " << p->dest << "; }" << reset << "\n";
-  if (get_if<Break>(&expr.contents))
-    return os << i << "break;" << " << endl;\n";
+  if (auto p = get_if<Break>(&expr.contents))
+    return os << i << "if (" << p->cond << ") { break; }\n";
   return os;
 }
 
