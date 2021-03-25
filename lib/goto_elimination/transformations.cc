@@ -54,11 +54,12 @@ namespace goto_elimination
 
   Stmt::Iterator move_inward(Stmt::Iterator it, Stmt::Iterator target) {
     assert(holds_alternative<Goto>(it->contents));
-    assert(it->par_stmt == target->par_stmt->par_expr->par_stmt);
+    assert(it->par_stmt == target->par_stmt);
 
-    const Goto& e = get<Goto>(it->contents);
+    // Not a reference, cause we will detele it
+    const Goto e = get<Goto>(it->contents);
     Stmt& par_s = *it->par_stmt;
-    const string& label = it->label;
+    const string label = it->label;
 
     if (holds_alternative<If>(target->contents)) {
       const string suffix = to_string(level(*it)) + "_in_";
