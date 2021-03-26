@@ -5,16 +5,16 @@ graph LR
     D --> E{b<42}
     E -->|True| C
     E -->|False| F(a)
-    F --> O{b>=1000}
-    O -->|True| Q{b>100}
+    F --> O{b>=100}
+    O -->|True| Q{b>10}
     Q -->|True| J("HELLO")
-    Q -->|False| M{b>100}
+    Q -->|False| M{b>10}
     M -->|True| K("WORLD")
-    M -->|False| P{b>100}
+    M -->|False| P{b>10}
     P -->|True| D
     P -->|False| Q
     O -->|False| G{a%5==0}
     G -->|False| B
-    G -->|True| H{a < 500}
+    G -->|True| H{a < 50}
     H -->|False| B
     H -->|True| E

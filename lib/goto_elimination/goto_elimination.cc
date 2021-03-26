@@ -4,6 +4,7 @@ using namespace ast;
 using namespace std;
 
 namespace goto_elimination {
+/* Stmt::ptr eliminateGoto(Stmt::ptr stmt, bool verbose = false) { */
 Stmt::ptr eliminateGoto(Stmt::ptr stmt) {
   std::cout << "Starting eliminating gotos:" << std::endl << *stmt << std::endl;
 

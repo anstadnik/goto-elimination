@@ -70,12 +70,12 @@ TEST_P(TestGotoElimination, TestEqOutput) {
   ASSERT_EQ(s->find_type<Goto>(), s->end());
 
   ASSERT_EQ(system("g++ /tmp/original.cc -o /tmp/original"), 0);
-  std::cout << "Original output:" << std::endl;
-  ASSERT_EQ(system("/tmp/original"), 0);
+  /* std::cout << "Original output:" << std::endl; */
+  ASSERT_EQ(system("/tmp/original > /dev/null"), 0);
 
   ASSERT_EQ(system("g++ /tmp/changed.cc -o /tmp/changed"), 0);
-  std::cout << "Changed output:" << std::endl;
-  ASSERT_EQ(system("/tmp/changed"), 0);
+  /* std::cout << "Changed output:" << std::endl; */
+  ASSERT_EQ(system("/tmp/changed > /dev/null"), 0);
 
   ASSERT_EQ(system("diff <(/tmp/original) <(/tmp/changed)"), 0);
 }

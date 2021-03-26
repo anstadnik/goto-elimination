@@ -6,6 +6,8 @@ add_library(${PROJECT_NAME} ${SOURCES})
 add_subdirectory(algs)
 target_link_libraries(${PROJECT_NAME} algs)
 
+# target_precompile_headers(${PROJECT_NAME} PRIVATE ast/ast.h)
+
 # Threads
 # find_package(Threads)
 # target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})

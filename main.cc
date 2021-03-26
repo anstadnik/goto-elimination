@@ -1,13 +1,6 @@
-#include <iterator>
-
-#define BACKWARD_HAS_DW 1
 #include "algs/algs.h"
 #include "ast.h"
 #include "goto_elimination.h"
-
-/* namespace backward { */
-/* backward::SignalHandling sh; */
-/* }  // namespace backward */
 
 using namespace std;
 
@@ -22,7 +15,6 @@ std::string parseArgs(int argc, const char *argv[]) {
 
 int main(int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
-  icecream::ic.include_context(true);
 
   /* string fn = ParseArgs(argc, argv); */
   (void)argc, (void)argv;
@@ -37,6 +29,7 @@ int main(int argc, char *argv[]) {
 
   ast::Stmt::ptr st = ast::StatementFactory::gen_statement(s);
   std::cout << *st << std::endl;
+  dbg("POTATO");
 
   /* st->dump("/tmp/original.cc"); */
 
