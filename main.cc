@@ -27,17 +27,33 @@ int main(int argc, char *argv[]) {
   /* string fn = ParseArgs(argc, argv); */
   (void)argc, (void)argv;
   /* const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL}; */
-  const char *dummy[] = {"app", "inputs/complicated.txt", NULL};
+  /* const char *dummy[] = {"app", "inputs/complicated.txt", NULL}; */
+  /* const char *dummy[] = {"app", "inputs/working_complicated.txt", NULL}; */
+  const char *dummy[] = {"app", "inputs/normal.txt", NULL};
+  /* const char *dummy[] = {"app", "inputs/count_to_10.txt", NULL}; */
   string fn = parseArgs(2, dummy);
   list<string> s = readFileToList(fn);
   /* for (const auto &l : s) std::cout << l << std::endl; */
 
   ast::Stmt::ptr st = ast::StatementFactory::gen_statement(s);
+  std::cout << *st << std::endl;
+
+  /* st->dump("/tmp/original.cc"); */
+
+  /* st = goto_elimination::eliminateGoto(move(st)); */
+
+  /* st->dump("/tmp/changed.cc"); */
+
   /* std::cout << *st << std::endl; */
 
-  st = goto_elimination::eliminateGoto(move(st));
+  /* system("g++ /tmp/original.cc -o /tmp/original"); */
+  /* std::cout << "Original output:" << std::endl; */
+  /* system("/tmp/original"); */
 
-  std::cout << *st << std::endl;
+  /* std::cout << *st << std::endl; */
+  /* system("g++ /tmp/changed.cc -o /tmp/changed"); */
+  /* std::cout << "Changed output:" << std::endl; */
+  /* system("/tmp/changed"); */
 
   return 0;
 }

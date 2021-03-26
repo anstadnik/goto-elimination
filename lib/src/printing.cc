@@ -55,7 +55,7 @@ ostream& operator<<(ostream& os, const Expr& expr) {
   if (auto p = get_if<Break>(&expr.contents))
     return os << i << "if (" << p->cond << ") { break; }\n";
   if (get_if<Empty>(&expr.contents))
-    return os << i << "\\\\ Empty\n";
+    return os << i << "(void)1; // Empty\n";
   return os;
 }
 
@@ -65,10 +65,10 @@ ostream& operator<<(ostream& os, const Stmt& stmt) {
     "*  Statement   *\n"
     "***************/\n";
 
-  if (!stmt.par_expr)
-    std::cout << head << std::endl;
-  for (const auto& e : stmt.s)
-    os << e;
+  if (!stmt.par_expr) 
+    os << head << std::endl;
+  
+  for (const auto& e : stmt.s) os << e;
   return os;
 }
 

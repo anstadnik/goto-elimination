@@ -57,6 +57,8 @@ class Stmt {
   Stmt::ptr extract_from(const Iterator& begin);
   Stmt::ptr extract(const Iterator& begin, const Iterator& end);
 
+  void dump(const string& fn);
+
   friend ostream& operator<<(ostream& os, const Stmt& a);
   friend class tests::Test;
   friend Stmt* getNestedStmt(const Expr& p);

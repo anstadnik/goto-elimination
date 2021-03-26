@@ -145,9 +145,9 @@ namespace goto_elimination
 
     // Insert conditionals
     par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
-       Expr(prefix + "_goto_", Assign{prefix + "_goto_", "0"}));
+       Expr(prefix + "_goto_f_", Assign{prefix + "_goto_", "0"}));
     par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
-       Expr(prefix + "_f_t_", Assign{prefix + "_goto_", "1"}));
+       Expr(prefix + "_f_t_", Assign{prefix + "_f_", "1"}));
 
     // Save as a reference to the it position
     const auto& next_e = next(it);
@@ -190,12 +190,12 @@ namespace goto_elimination
       // Remove everything between the target and the goto
       Stmt::ptr body = par_s.extract(target, it);
       if (body->size()) {
-        par_s.insert(it, Expr(prefix + "_f_t_", Assign{prefix + "_goto_", "1"}));
+        par_s.insert(it, Expr(prefix + "_f_t_", Assign{prefix + "_f_", "1"}));
         body->insert(body->begin(),
                      Expr(prefix + "_f_f_", Assign{prefix + "_f_", "0"}));
         it = par_s.insert(
             it, Expr(prefix,
-                     While{move(body), g.cond + " || " + prefix + "_f_f_"}));
+                     While{move(body), g.cond + " || " + prefix + "_f_"}));
       }
     }
     par_s.find(label)->contents = Empty();

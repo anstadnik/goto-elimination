@@ -81,4 +81,21 @@ Stmt::Iterator Stmt::find_direct_child(const Expr& e) {
 
 Stmt::Iterator Stmt::begin() { return Iterator(s.begin(), this); }
 Stmt::Iterator Stmt::end() { return Iterator(s.end(), this); }
+
+void Stmt::dump(const string& fn) {
+  ofstream f;
+  f.open(fn);
+  f << "#include <iostream>\nusing namespace std;\n\nint main() {\n";
+
+  unordered_set<string> s;
+  for (const auto& it : *this)
+    if (auto p = get_if<Assign>(&it.contents); p and !s.count(p->var)) {
+      s.emplace(p->var);
+      f << "int " + p->var + "=0;\n";
+    }
+
+  f << *this;
+  f << "}\n";
+  f.close();
+}
 }  // namespace ast

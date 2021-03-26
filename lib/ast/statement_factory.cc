@@ -23,7 +23,7 @@ Stmt::ptr StatementFactory::parse_tree_to_statement(
       if (keys.count(dest))
         stmt->push_back(Expr(cur_label, Goto{dest, cond}));
       else if (keys.count(next)) {
-        stmt->push_back(Expr(cur_label, Goto{next, "!" + cond}));
+        stmt->push_back(Expr(cur_label, Goto{next, "!(" + cond + ")"}));
         next = dest;
       } else {
         auto nested_stmt = parse_tree_to_statement(t, dest, keys);

@@ -53,9 +53,6 @@ ast::Stmt::Iterator eliminate(ast::Stmt::Iterator it);
  *  Helpers  *
  *************/
 
-ast::Stmt* get_common_parent(const ast::Stmt::Iterator& a,
-                             const ast::Stmt::Iterator& b);
-
 ast::Stmt::ptr eliminateGoto(ast::Stmt::ptr stmt);
 
 }  // namespace goto_elimination
