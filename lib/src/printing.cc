@@ -46,7 +46,7 @@ ostream& operator<<(ostream& os, const Expr& expr) {
               << " {\n" << *p->branch << i << string(25, ' ') << "}\n";
   if (auto p = get_if<While>(&expr.contents))
     return os << i << "while (" << p->cond << ") {\n"
-              << *p->body << i << "    " << "\n}\n";
+              << *p->body << i << string(25, ' ') << "}\n";
   if (auto p = get_if<Print>(&expr.contents))
     return os << i << "cout << " << p->var << " << endl;\n";
   if (auto p = get_if<Goto>(&expr.contents))
@@ -54,6 +54,8 @@ ostream& operator<<(ostream& os, const Expr& expr) {
               << " " << "goto " << p->dest << "; }" << reset << "\n";
   if (auto p = get_if<Break>(&expr.contents))
     return os << i << "if (" << p->cond << ") { break; }\n";
+  if (get_if<Empty>(&expr.contents))
+    return os << i << "\\\\ Empty\n";
   return os;
 }
 

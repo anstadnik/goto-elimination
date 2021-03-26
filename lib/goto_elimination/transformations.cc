@@ -17,20 +17,25 @@ namespace goto_elimination
     const Goto e = get<Goto>(it->contents);
     const string label = it->label;
 
-    const string suffix =  "_out_" + label + to_string(level(*it));
-    const string bool_name =  suffix + "_cond_";
+    const string prefix =  "_out_" + label + "_" + to_string(level(*it));
+    const string bool_name =  prefix + "_cond_";
 
     // Insert condition
     par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
-    // Put everything after the goto in If
-    Stmt::ptr branch = par_s.extract_from(next(it));
-    par_s.insert(it, Expr( suffix+ "_if_" , If{move(branch), "!" + bool_name}));
+    if (level(*next(it)) == level(*it)) {
+      // Put everything after the goto in If
+      Stmt::ptr branch = par_s.extract_from(next(it));
+      par_s.insert(it,
+                   Expr(prefix + "_if_", If{move(branch), "!" + bool_name}));
+    }
     par_s.remove(label);
     // Insert goto after it's previous parent
     Stmt::Iterator par_e =
         par_s.par_expr->par_stmt->find(par_s.par_expr->label);
     Stmt::Iterator next_e = next(par_e);
-    while (level(*next_e) != level(*par_e)) ++next_e;
+    while (next_e != par_e->par_stmt->end() &&
+           level(*next_e) != level(*par_e)) 
+      ++next_e;
 
     it = par_e->par_stmt->insert(next_e, Expr(label, Goto{e.dest, bool_name}));
 
@@ -42,12 +47,12 @@ namespace goto_elimination
     const Goto e = get<Goto>(it->contents);
     const string label = it->label;
 
-    const string suffix =  "_out_" + label + to_string(level(*it));
-    const string bool_name =  suffix + "_cond_";
+    const string prefix =  "_out_" + label + "_" + to_string(level(*it));
+    const string bool_name =  prefix + "_cond_";
 
     // Insert condition
     par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
-    par_s.insert(it, Expr(suffix+ "_if_" , Break{e.cond}));
+    par_s.insert(it, Expr(prefix+ "_if_" , Break{e.cond}));
 
     par_s.remove(label);
 
@@ -84,37 +89,44 @@ namespace goto_elimination
 
     // Not a reference, cause we will detele it
     const Goto e = get<Goto>(it->contents);
-    Stmt& par_s = *it->par_stmt;
     const string label = it->label;
+    Stmt& par_s = *it->par_stmt;
 
-    if (holds_alternative<If>(target->contents)) {
-      const string suffix = "_in_" + to_string(level(*it));
-      string bool_name =  suffix +"_cond_" + label;
-      // Insert condition
-      par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
-      // Put everything between the goto and target in If
+    const string prefix = "_in_" + label + "_" + to_string(level(*it));
+    const string bool_name = prefix + "_cond_";
+
+    // Insert condition
+    par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
+
+    // Put everything between the goto and target in If
+    if (level(*next(it)) == level(*it)) {
       auto&& branch = par_s.extract(next(it), target);
-      if (branch->size())
-        par_s.insert(it, Expr( suffix +"_if_" + label,
-                              If{move(branch), "!" + bool_name}));
-      par_s.remove(label);
-      // Change the condition
-      get<If>(par_s.find_direct_child(*target)->contents).cond += " || " + bool_name;
-      // Insert goto after it's previous parent
-      auto& target_s = get<If>(target->contents);
-      if (target_s.branch->size())
-        it = target_s.branch->insert(target_s.branch->begin(),
-            Expr(label, Goto{e.dest, bool_name}));
-      else
-        it = target_s.branch->insert(target_s.branch->end(),
-            Expr(label, Goto{e.dest, bool_name}));
+      par_s.insert(
+          it, Expr(prefix + "_if_" + label, If{move(branch), "!" + bool_name}));
+    }
+    par_s.remove(label);
 
-    } else if (holds_alternative<While>(it->contents)) {
-      throw runtime_error("Not implemented");
-
+    Stmt* nested_s;
+    // Change the condition and get nested body / branch
+    if (holds_alternative<If>(target->contents)) {
+      get<If>(par_s.find_direct_child(*target)->contents).cond +=
+          " || " + bool_name;
+      nested_s = get<If>(target->contents).branch.get();
+    } else if (holds_alternative<While>(target->contents)) {
+      get<While>(par_s.find_direct_child(*target)->contents).cond +=
+          " || " + bool_name;
+      nested_s = get<While>(target->contents).body.get();
     } else
-        /* Here could be logic for switch */
+      /* Here could be logic for switch */
       throw runtime_error("I don't know this type of expression");
+
+    if (nested_s->size())
+      it = nested_s->insert(nested_s->begin(),
+                                   Expr(label, Goto{e.dest, bool_name}));
+    else
+      it = nested_s->insert(nested_s->end(),
+                                   Expr(label, Goto{e.dest, bool_name}));
+    return it;
 
     return it;
   }
@@ -127,15 +139,15 @@ namespace goto_elimination
     const Goto e = get<Goto>(it->contents);
     const string label = it->label;
 
-    const string suffix = "_lift_" + label + to_string(level(*it));
+    const string prefix = "_lift_" + label +"_" +  to_string(level(*it));
 
     Stmt& par_s = *it->par_stmt;
 
     // Insert conditionals
     par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
-       Expr(suffix + "_goto_", Assign{suffix + "_goto_", "0"}));
+       Expr(prefix + "_goto_", Assign{prefix + "_goto_", "0"}));
     par_s.insert(par_s.size() ? par_s.begin() : par_s.end(),
-       Expr(suffix + "_f_t_", Assign{suffix + "_goto_", "1"}));
+       Expr(prefix + "_f_t_", Assign{prefix + "_goto_", "1"}));
 
     // Save as a reference to the it position
     const auto& next_e = next(it);
@@ -144,16 +156,16 @@ namespace goto_elimination
     auto&& body = par_s.extract(target, it);
 
     // Change flags
-    body->insert(body->begin(), Expr(suffix + "_f_f_", Assign{suffix + "_f_", "0"}));
-    body->insert(body->end(), Expr(suffix + "_goto_", Assign{suffix + "_goto_", e.cond}));
+    body->insert(body->begin(), Expr(prefix + "_f_f_", Assign{prefix + "_f_", "0"}));
+    body->insert(body->end(), Expr(prefix + "_goto_", Assign{prefix + "_goto_", e.cond}));
 
     // Go in loop for the first time or if the goto cond is true
-    const string while_cond = suffix + "_goto_" + " || " + suffix + "_f_";
+    const string while_cond = prefix + "_goto_" + " || " + prefix + "_f_";
 
     it = body->insert(body->find(target->label), Expr(label, e));
 
     par_s.insert(next_e,
-                 Expr(suffix + "_if_", While{move(body), while_cond}));
+                 Expr(prefix + "_if_", While{move(body), while_cond}));
     par_s.remove(label);
 
     return it;
@@ -167,21 +179,27 @@ namespace goto_elimination
     const Stmt::Iterator& target = par_s.find(g.dest);
     assert(level(*it) == level(*target));
     const string label =  it->label;
+    auto prefix = "_elim_" + label;
 
     if (offset(*it) < offset(*par_s.find(g.dest))) {
       // Remove everything until the target
       Stmt::ptr branch = par_s.extract(next(it), target);
       if (branch->size())
-        it = par_s.insert(it, Expr("_elim_" +label, If{move(branch), "!" + g.cond}));
-      par_s.remove(label);
+        it = par_s.insert(it, Expr(prefix, If{move(branch), "!" + g.cond}));
     } else {
       // Remove everything between the target and the goto
-      Stmt::ptr branch = par_s.extract(target, it);
-      if (branch->size())
-        it = par_s.insert(it, Expr("_elim_" +label, While{move(branch), g.cond}));
-      par_s.remove(label);
+      Stmt::ptr body = par_s.extract(target, it);
+      if (body->size()) {
+        par_s.insert(it, Expr(prefix + "_f_t_", Assign{prefix + "_goto_", "1"}));
+        body->insert(body->begin(),
+                     Expr(prefix + "_f_f_", Assign{prefix + "_f_", "0"}));
+        it = par_s.insert(
+            it, Expr(prefix,
+                     While{move(body), g.cond + " || " + prefix + "_f_f_"}));
+      }
     }
+    par_s.find(label)->contents = Empty();
     return it;
   }
-  
+
 } /* goto_elimination */ 

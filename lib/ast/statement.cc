@@ -43,7 +43,8 @@ Stmt::ptr Stmt::extract_from(const Stmt::Iterator& begin) {
 
 Stmt::ptr Stmt::extract(const Iterator& begin, const Iterator& end) {
   Stmt::ptr extracted_s = make_unique<Stmt>();
-  assert(begin->par_stmt == this && (end == this->end() || end->par_stmt == this));
+  assert(begin->par_stmt == this);
+  assert(end == this->end() || end->par_stmt == this);
 
   auto b = begin.get_it(), e = end.get_it();
   assert(b != s.end() and distance(s.begin(), b) <= distance(s.begin(), e));
@@ -66,6 +67,10 @@ Stmt::Stmt(Expr&& e, Expr* parent_expr) : par_expr(parent_expr) {
 }
 
 Stmt::Iterator Stmt::find(const string& label) {
+  /* Iterator rez; */
+  /* for (rez = begin(); rez != end(); rez++) */
+  /*   if (rez->label == label) break; */
+  /* return rez; */
   return std::find_if(this->begin(), this->end(),
                       [&label](const Expr& e) { return e.label == label; });
 }
