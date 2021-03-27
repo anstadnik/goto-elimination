@@ -1,0 +1,5 @@
+graph LR
+    A[a=0] --> B[a=a+1]
+    B --> C{a<10}
+    C --> |True| D(a)
+    C --> |False| B

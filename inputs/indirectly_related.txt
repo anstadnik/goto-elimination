@@ -1,18 +1,9 @@
 graph LR
-    B{1} -->|True| Q{0}
-    B -->|False| R("WORLD")
-    Q -->|True| J("HELLO")
-    Q -->|False| O{1}
-    O -->|True| R
-    O -->|False| M
-
-%% B:  if (1) {
-%% Q:    if (0) {
-%% J:      cout << "HELLO" << endl;
-%%       }
-%% O:    if (1) {
-%% R:      cout << "WORLD" << endl;
-%%       }
-%% M:      }
-%% _B: if (true) { goto R; }
-
+    A[a=0] --> B{1}
+    B -->|True| C{0}
+    C -->|True| D("HELLO")
+    C -->|False| E[a=a+1]
+    E --> F{a<2}
+    F -->|True| D
+    F -->|False| G("WORLD")
+    G --> H

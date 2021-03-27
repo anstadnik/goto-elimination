@@ -1,0 +1,8 @@
+graph LR
+    A[a=0] --> B[a=a+1]
+    B --> C{1}
+    C -->|True| D(a)
+    D --> E{a<10}
+    E -->|True| B
+    E -->|False| F
+    C -->|False| G

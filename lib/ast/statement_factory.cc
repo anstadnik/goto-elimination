@@ -34,7 +34,9 @@ Stmt::ptr StatementFactory::parse_tree_to_statement(
           break;
         }
       }
-    } else
+    } else if (keys.count(next))
+      throw runtime_error("Please use a conditional goto to jump up instead of a plane one");
+    else
       stmt->push_back(move(expr));
 
     keys.insert(cur_label);

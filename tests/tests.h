@@ -11,7 +11,7 @@ class TestTransformations : public ::testing::Test {
  protected:
   void SetUp() override {
     s = ast::StatementFactory::gen_statement(
-        readFileToList("inputs/complicated.txt"));
+        algs::io::readFileToList("inputs/complicated.txt"));
     a = s->find("A");
     b = s->find("B");
     e = s->find("E");
@@ -40,7 +40,8 @@ class TestTransformations : public ::testing::Test {
 class TestGotoElimination : public ::testing::TestWithParam<const char*> {
  protected:
   void SetUp() override {
-    s = ast::StatementFactory::gen_statement(readFileToList(GetParam()));
+    s = ast::StatementFactory::gen_statement(
+        algs::io::readFileToList(GetParam()));
   }
 
   ast::Stmt::ptr s;

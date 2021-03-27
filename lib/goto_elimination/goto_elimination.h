@@ -49,10 +49,13 @@ ast::Stmt::Iterator move_inward(ast::Stmt::Iterator it, ast::Stmt::Iterator pare
 ast::Stmt::Iterator lift(ast::Stmt::Iterator it, ast::Stmt::Iterator target);
 ast::Stmt::Iterator eliminate(ast::Stmt::Iterator it);
 
-/*************
- *  Helpers  *
- *************/
+/*******************
+*  Main function  *
+*******************/
 
-ast::Stmt::ptr eliminateGoto(ast::Stmt::ptr stmt);
+template <typename T>
+ast::Stmt::ptr eliminateGoto(ast::Stmt::ptr stmt, T&& os);
 
 }  // namespace goto_elimination
+
+#include "goto_elimination.ipp"

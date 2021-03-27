@@ -2,6 +2,10 @@
 #include "ast.h"
 #include "goto_elimination.h"
 
+namespace backward {
+backward::SignalHandling sh;
+}  // namespace backward
+
 using namespace std;
 
 std::string parseArgs(int argc, const char *argv[]) {
@@ -13,6 +17,8 @@ std::string parseArgs(int argc, const char *argv[]) {
   return argv[1];
 }
 
+template <typename T> std::string type_name();
+
 int main(int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
 
@@ -20,33 +26,33 @@ int main(int argc, char *argv[]) {
   (void)argc, (void)argv;
   /* const char *dummy[] = {"app", "inputs/indirectly_related.txt", NULL}; */
   /* const char *dummy[] = {"app", "inputs/complicated.txt", NULL}; */
-  /* const char *dummy[] = {"app", "inputs/working_complicated.txt", NULL}; */
-  const char *dummy[] = {"app", "inputs/normal.txt", NULL};
+  const char *dummy[] = {"app", "inputs/working_complicated.txt", NULL};
+  /* const char *dummy[] = {"app", "inputs/normal.txt", NULL}; */
   /* const char *dummy[] = {"app", "inputs/count_to_10.txt", NULL}; */
   string fn = parseArgs(2, dummy);
-  list<string> s = readFileToList(fn);
+  list<string> s = algs::io::readFileToList(fn);
   /* for (const auto &l : s) std::cout << l << std::endl; */
 
   ast::Stmt::ptr st = ast::StatementFactory::gen_statement(s);
   std::cout << *st << std::endl;
-  dbg("POTATO");
+  /* dbg("POTATO"); */
 
-  /* st->dump("/tmp/original.cc"); */
+  st->dump("/tmp/original.cc");
 
-  /* st = goto_elimination::eliminateGoto(move(st)); */
+  st = goto_elimination::eliminateGoto(move(st), ostream(0));
 
-  /* st->dump("/tmp/changed.cc"); */
+  st->dump("/tmp/changed.cc");
 
-  /* std::cout << *st << std::endl; */
+  std::cout << *st << std::endl;
 
-  /* system("g++ /tmp/original.cc -o /tmp/original"); */
-  /* std::cout << "Original output:" << std::endl; */
-  /* system("/tmp/original"); */
+  system("g++ /tmp/original.cc -o /tmp/original");
+  std::cout << "Original output:" << std::endl;
+  system("/tmp/original");
 
-  /* std::cout << *st << std::endl; */
-  /* system("g++ /tmp/changed.cc -o /tmp/changed"); */
-  /* std::cout << "Changed output:" << std::endl; */
-  /* system("/tmp/changed"); */
+  std::cout << *st << std::endl;
+  system("g++ /tmp/changed.cc -o /tmp/changed");
+  std::cout << "Changed output:" << std::endl;
+  system("/tmp/changed");
 
   return 0;
 }

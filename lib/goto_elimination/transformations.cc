@@ -120,13 +120,15 @@ namespace goto_elimination
       /* Here could be logic for switch */
       throw runtime_error("I don't know this type of expression");
 
-    if (nested_s->size())
-      it = nested_s->insert(nested_s->begin(),
-                                   Expr(label, Goto{e.dest, bool_name}));
-    else
-      it = nested_s->insert(nested_s->end(),
-                                   Expr(label, Goto{e.dest, bool_name}));
-    return it;
+    // Cannot be empty, cause there is something onto which the goto points
+    assert(nested_s->size());
+    // Add the goto
+    it = nested_s->insert(nested_s->begin(),
+                          Expr(label, Goto{e.dest, bool_name}));
+
+    // Change the condition to false to avoid infinite loop
+    nested_s->insert(nested_s->find(e.dest),
+                     Expr(bool_name + "f_", Assign{bool_name, "0"}));
 
     return it;
   }
@@ -162,7 +164,7 @@ namespace goto_elimination
     // Go in loop for the first time or if the goto cond is true
     const string while_cond = prefix + "_goto_" + " || " + prefix + "_f_";
 
-    it = body->insert(body->find(target->label), Expr(label, e));
+    it = body->insert(body->find(target->label), Expr(label, Goto{e.dest, prefix + "_goto_"}));
 
     par_s.insert(next_e,
                  Expr(prefix + "_if_", While{move(body), while_cond}));

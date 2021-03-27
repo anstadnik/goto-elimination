@@ -3,6 +3,11 @@
 
 using namespace ast;
 using namespace goto_elimination;
+
+namespace backward {
+backward::SignalHandling sh;
+}  // namespace backward
+
 namespace tests {
 
 TEST_F(TestTransformations, testLoad) {
@@ -60,21 +65,51 @@ TEST_F(TestTransformations, testMoveInward) {
   ASSERT_GT(level(*p), old_level);
   ASSERT_GT(offset(*p), old_offset);
 }
+
+class LoggerTesting {
+  void dump(Stmt& s) {
+    s.dump("/tmp/current.cc");
+    assert(!system("g++ /tmp/current.cc -o /tmp/current"));
+    assert(!system("/tmp/current > /dev/null"));
+  }
+
+ public:
+  LoggerTesting(Stmt& s) {
+    dbg(s);
+    dump(s);
+    rename("/tmp/current", "/tmp/previous");
+    rename("/tmp/current.cc", "/tmp/previous.cc");
+  }
+  template <typename T>
+  ostream operator<<(const T& v) {
+    (void)v;
+    return ostream(0);
+  }
+  ostream operator<<(Stmt& s) {
+    dbg(s);
+    dump(s);
+    assert(!system("diff <(/tmp/current) <(/tmp/previous)"));
+    rename("/tmp/current", "/tmp/previous");
+    rename("/tmp/current.cc", "/tmp/previous.cc");
+    return ostream(0);
+  }
+};
+
 TEST_P(TestGotoElimination, TestEqOutput) {
   s->dump("/tmp/original.cc");
   /* std::cout << *s << std::endl; */
-  s = goto_elimination::eliminateGoto(move(s));
+  /* dbg(*s); */
+  s = goto_elimination::eliminateGoto(move(s), LoggerTesting(*s));
+  /* dbg(*s); */
   /* std::cout << *s << std::endl; */
   s->dump("/tmp/changed.cc");
 
   ASSERT_EQ(s->find_type<Goto>(), s->end());
 
   ASSERT_EQ(system("g++ /tmp/original.cc -o /tmp/original"), 0);
-  /* std::cout << "Original output:" << std::endl; */
   ASSERT_EQ(system("/tmp/original > /dev/null"), 0);
 
   ASSERT_EQ(system("g++ /tmp/changed.cc -o /tmp/changed"), 0);
-  /* std::cout << "Changed output:" << std::endl; */
   ASSERT_EQ(system("/tmp/changed > /dev/null"), 0);
 
   ASSERT_EQ(system("diff <(/tmp/original) <(/tmp/changed)"), 0);
@@ -82,8 +117,9 @@ TEST_P(TestGotoElimination, TestEqOutput) {
 
 INSTANTIATE_TEST_SUITE_P(
     TestEqOutput, TestGotoElimination,
-    testing::Values("inputs/lift.txt", "inputs/elim_if.txt",
-                    "inputs/normal.txt", "inputs/elim_while.txt"),
+    testing::Values("inputs/elim_while.txt", "inputs/out.txt", "inputs/lift.txt",
+                    "inputs/indirectly_related.txt", "inputs/working_complicated.txt"),
+
     [](testing::TestParamInfo<TestGotoElimination::ParamType> s)
         -> std::string {
       std::string s_(s.param);

@@ -1,5 +1,7 @@
 graph LR
-    A[a=0] --> B{a<1}
-    B --> |True| C(a)
-    B --> |False| D
-    D --> A
+    A[a=0] --> B{a<10}
+    B -->|True| D(a)
+    B -->|False| C[a=a+1]
+    C --> E{a<10}
+    E -->|True| D
+    E -->|False| F
