@@ -28,7 +28,7 @@ namespace goto_elimination
       par_s.insert(it,
                    Expr(prefix + "_if_", If{move(branch), "!" + bool_name}));
     }
-    par_s.remove(label);
+    par_s.erase(par_s.find(label));
     // Insert goto after it's previous parent
     Stmt::Iterator par_e =
         par_s.par_expr->par_stmt->find(par_s.par_expr->label);
@@ -54,7 +54,7 @@ namespace goto_elimination
     par_s.insert(it, Expr(bool_name, Assign{bool_name, e.cond}));
     par_s.insert(it, Expr(prefix+ "_if_" , Break{e.cond}));
 
-    par_s.remove(label);
+    par_s.erase(par_s.find(label));
 
     // Insert goto after it's previous parent
     Stmt::Iterator par_e =
@@ -104,7 +104,7 @@ namespace goto_elimination
       par_s.insert(
           it, Expr(prefix + "_if_" + label, If{move(branch), "!" + bool_name}));
     }
-    par_s.remove(label);
+    par_s.erase(par_s.find(label));
 
     Stmt* nested_s;
     // Change the condition and get nested body / branch
@@ -127,9 +127,10 @@ namespace goto_elimination
                           Expr(label, Goto{e.dest, bool_name}));
 
     // Change the condition to false to avoid infinite loop
-    nested_s->insert(nested_s->find(e.dest),
-                     Expr(bool_name + "f_", Assign{bool_name, "0"}));
-
+    // And make it in the same block with the same label
+    assert(nested_s->find(e.dest) != nested_s->end());
+    nested_s->find(e.dest)->additional_stmt.emplace_front(
+        bool_name + "f_", Assign{bool_name, "0"});
     return it;
   }
 
@@ -168,7 +169,7 @@ namespace goto_elimination
 
     par_s.insert(next_e,
                  Expr(prefix + "_if_", While{move(body), while_cond}));
-    par_s.remove(label);
+    par_s.erase(par_s.find(label));
 
     return it;
   }

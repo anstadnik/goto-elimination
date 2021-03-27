@@ -29,12 +29,10 @@ Stmt::Iterator Stmt::insert(const Iterator& parent, Expr&& expr) {
 
 bool Stmt::empty() const { return s.empty(); }
 
-void Stmt::remove(const string& label) {
-  for (auto& e : *this)
-    if (e.label == label) {
-      e.par_stmt->s.remove(e);
-      break;
-    }
+Stmt::Iterator Stmt::erase(const Iterator& it) {
+  if (it == end() || it->par_stmt == this)
+    return {s.erase(it.get_it()), this};
+  return it->par_stmt->erase(it);
 }
 
 Stmt::ptr Stmt::extract_from(const Stmt::Iterator& begin) {

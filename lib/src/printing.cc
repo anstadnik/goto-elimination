@@ -37,10 +37,12 @@ ostream& operator<<(ostream& os, const Expr& expr) {
   os << green << setw(25) << left << expr.label + ":" << reset;
 
   const string i = getIndent(expr);
-  /* const string i = ""; */
+
+  for (const auto& additional : expr.additional_stmt) 
+    os << additional << std::endl;
+
   if (auto p = get_if<Assign>(&expr.contents))
     return os << i << p->var << "=" << p->op << ";\n";
-
   if (auto p = get_if<If>(&expr.contents))
     return os << i << magenta << "if (" << p->cond << ")" << reset
               << " {\n" << *p->branch << i << string(25, ' ') << "}\n";

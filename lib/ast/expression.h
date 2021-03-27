@@ -49,6 +49,8 @@ class Expr {
   using content = variant<Assign, If, While, Print, Goto, Break, Empty>;
   content contents;
   Stmt* par_stmt = nullptr;
+  // Sometimes it's needed to do something under the same label
+  list<Expr> additional_stmt;
   string label;
 
   template <typename T>

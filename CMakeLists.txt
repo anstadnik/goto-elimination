@@ -13,7 +13,7 @@ string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Wall -Wextra -pedantic -Werror")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
-# Speed up with Cotire
+# Speed up
 # set(UNITY_BUILD true)
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
