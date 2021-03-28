@@ -1,11 +1,15 @@
 include(GoogleTest)
 
 find_package(GTest REQUIRED)
-# include_directories(ast goto_elimination tests)
-# file(GLOB SOURCES tests.cc ../src/*.cc ../ast/*.cc ../goto_elimination/*.cc)
 add_executable(test tests.cc)
 target_link_libraries(test goto_elimination GTest::GTest)
 
-# gtest_add_tests(TARGET tests TEST_PREFIX old:)
 gtest_discover_tests(test)
-# add_test(NAME monolithic COMMAND tests)
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+message(${CMAKE_MODULE_PATH})
+# if(CMAKE_COMPILER_IS_GNUCXX)
+include(CodeCoverage)
+append_coverage_compiler_flags()
+setup_target_for_coverage_gcovr_html(NAME test_coverage EXECUTABLE tests/test DEPENDENCIES test BASE_DIRECTORY "${PROJECT_SOURCE_DIR}/..")
+# endif()

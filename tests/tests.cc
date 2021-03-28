@@ -112,13 +112,13 @@ TEST_P(TestGotoElimination, TestEqOutput) {
 
 INSTANTIATE_TEST_SUITE_P(
     TestEqOutput, TestGotoElimination,
-    testing::Values("inputs/elim_while.txt", "inputs/out.txt", "inputs/lift.txt",
-                    "inputs/indirectly_related.txt", "inputs/working_complicated.txt"),
+    testing::Values("../inputs/elim_while.txt", "../inputs/out.txt", "../inputs/lift.txt",
+                    "../inputs/indirectly_related.txt", "../inputs/working_complicated.txt"),
 
     [](testing::TestParamInfo<TestGotoElimination::ParamType> s)
         -> std::string {
       std::string s_(s.param);
-      return s_.erase(s_.size() - 4, 4).erase(0, 7);
+      return s_.erase(s_.size() - 4, 4).erase(0, 10);
     });
 
 }  // namespace tests
