@@ -1,12 +1,7 @@
 FROM archlinux
 
 # Load necessary tools for installing yay
-RUN pacman --noconfirm -Sy archlinux-keyring
-RUN pacman --noconfirm -S base-devel git cmake gtest ninja
-RUN pacman --noconfirm -S openssh
-RUN pacman --noconfirm -S gmock
-RUN pacman --noconfirm -S gcovr
-
+RUN pacman --noconfirm -Sy archlinux-keyring base-devel git cmake gtest ninja openssh gmock gcovr
 
 # Install necessary tools
 RUN git clone https://gitlab.com/astadnik/goto-elimination\
@@ -18,4 +13,4 @@ RUN git clone https://gitlab.com/astadnik/goto-elimination\
 			&& ./tests/test
 
 # Run the application
-			ENTRYPOINT ./build/app
+ENTRYPOINT ["/goto-elimination/build/app"]
