@@ -17,9 +17,6 @@ std::string parseArgs(int argc, const char *argv[]) {
   return argv[1];
 }
 
-template <typename T>
-std::string type_name();
-
 int main(int argc, const char *argv[]) {
   string fn = parseArgs(argc, argv);
   std::cout << argv[1] << std::endl;
